@@ -1,0 +1,33 @@
+.env
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+build/
+dist/
+.coverage
+htmlcov/
+.DS_Store
+
+# Local environment variants and credential files
+.env.*
+!.env.example
+.envrc
+*.pem
+*.key
+credentials.json
+token.json
+tokens.json
+
+# Alternate environments, tooling caches, and local output
+venv/
+env/
+.tox/
+.nox/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+.coverage.*
+coverage.xml
+*.log
