@@ -2,6 +2,8 @@ from copy import deepcopy
 
 import pytest
 
+pytestmark = pytest.mark.usefixtures("offline_semgrep")
+
 from app.integrations.github import FileTooLarge, GitHubError
 from app.models import AnalysisRequest
 from app.services.analysis import analyze

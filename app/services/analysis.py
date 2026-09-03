@@ -3,7 +3,10 @@ from starlette.concurrency import run_in_threadpool
 from app.config import Settings
 from app.integrations.github import FileTooLarge, GitHubClient, GitHubError
 from app.models import AnalysisRequest, AnalysisResponse, ScannedFile, SkippedFile
-from app.scanners.bandit import scan_files
+from app.scanners.runner import run_scanners
+from app.scanners.base import ScanError
+from app.services.dedup import deduplicate
+from collections import Counter
 from app.services.patches import changed_lines, line_ranges
 
 
@@ -56,16 +59,25 @@ async def analyze(request: AnalysisRequest, github: GitHubClient, settings: Sett
     latest = await github.pull_request(repo, number)
     if any(latest[side]["sha"] != pr[side]["sha"] for side in ("base", "head")) or latest["changed_files"] != pr["changed_files"]:
         raise GitHubError("PR changed during retrieval; retry the analysis.", 409)
-    findings, errors = await run_in_threadpool(scan_files, contents, settings.scan_timeout_seconds)
-    for filename, reason in errors.items():
-        skipped.append(SkippedFile(filename=filename, reason=f"Bandit: {reason}"))
-        complete = False
-    findings = [finding for finding in findings if finding.filename not in errors]
+    results = await run_in_threadpool(run_scanners, contents, settings)
+    if contents and not any(result.completed for result in results):
+        raise ScanError("All scanners failed: " + "; ".join(
+            f"{result.scanner}: {error.message}" for result in results for error in result.errors))
+    errors = [error for result in results for error in result.errors]
+    successful_files = set().union(*(set(result.scanned_files) for result in results))
+    for name in contents:
+        if name not in successful_files:
+            reasons = [error.message for error in errors if error.filename == name]
+            skipped.append(SkippedFile(filename=name, reason="; ".join(reasons) or "No scanner completed this file."))
+    complete = complete and all(result.completed and not result.errors
+                               and set(result.scanned_files) == set(contents) for result in results)
+    raw_findings = [finding for result in results for finding in result.findings]
+    findings = deduplicate(raw_findings)
     for finding in findings:
         lines = coverage[finding.filename]
         finding.is_on_changed_line = None if lines is None else finding.line_number in lines
     scanned = [ScannedFile(filename=name, changed_line_ranges=line_ranges(coverage[name]))
-               for name in contents if name not in errors]
+               for name in contents if name in successful_files]
     return AnalysisResponse(
         repository=repo, pull_request_number=number, title=pr["title"],
         author=(pr.get("user") or {}).get("login"), base_branch=pr["base"]["ref"],
@@ -73,4 +85,10 @@ async def analyze(request: AnalysisRequest, github: GitHubClient, settings: Sett
         files_changed=pr["changed_files"], python_files_scanned=len(scanned),
         findings_count=len(findings), findings=findings, scanned_files=scanned,
         skipped_files=skipped, warnings=warnings, analysis_complete=complete,
+        raw_findings_count=len(raw_findings), deduplicated_findings_count=len(findings),
+        findings_on_changed_lines=sum(f.is_on_changed_line is True for f in findings),
+        findings_by_scanner={r.scanner: len(r.findings) for r in results},
+        findings_by_severity=dict(Counter(f.severity for f in findings)),
+        scanner_errors=[e.model_dump() for e in errors],
+        scanner_metadata=[r.model_dump(exclude={"findings", "errors"}) for r in results],
     )

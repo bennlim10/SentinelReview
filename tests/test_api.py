@@ -1,6 +1,8 @@
 from fastapi.testclient import TestClient
 import pytest
 
+pytestmark = pytest.mark.usefixtures("offline_semgrep")
+
 from app.api.routes import get_github, get_settings
 from app.integrations.github import GitHubError
 from app.main import app

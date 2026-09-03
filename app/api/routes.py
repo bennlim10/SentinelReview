@@ -6,7 +6,7 @@ import httpx
 from app.config import Settings
 from app.integrations.github import GitHubClient, GitHubError
 from app.models import AnalysisRequest, AnalysisResponse
-from app.scanners.bandit import ScanError
+from app.scanners.base import ScanError
 from app.services.analysis import analyze
 
 router = APIRouter(prefix="/api/v1")

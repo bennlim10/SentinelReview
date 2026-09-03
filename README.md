@@ -1,207 +1,250 @@
 # SentinelReview
 
-SentinelReview v0.1 is an independent personal cybersecurity software engineering
-project. It analyzes changed Python files in public GitHub pull requests using
-Bandit and returns structured findings through a FastAPI REST API. It uses no
-proprietary or company code.
+SentinelReview v0.2 is an independent personal cybersecurity project. Given a
+public GitHub repository and PR number, it scans the complete changed Python files
+with **Bandit and Semgrep Community Edition**, conservatively merges equivalent
+findings, and returns structured JSON. No proprietary/company code is used.
+
+There is no AI, frontend, database, authentication, background worker, webhook,
+repository cloning, or deployment infrastructure.
 
 ## Setup
 
-Requires Python 3.12 or newer. From the repository root:
+Requires Python 3.12+ and a platform supported by Semgrep's native engine. The live
+v0.2 validation used Python 3.14 on macOS ARM64. From the repository root:
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -e '.[dev]'
 cp .env.example .env
-```
-
-Optionally set `GITHUB_TOKEN` in `.env`. It is sent only to the fixed GitHub API
-host and is not included in responses. The application rejects private repositories,
-even if the token can access them. Without a token, public API rate limits apply.
-Do not commit `.env`.
-
-```bash
 python -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-Open [interactive API docs](http://127.0.0.1:8000/docs).
+Set `GITHUB_TOKEN` in `.env` optionally. Private repositories remain unsupported.
+The token is sent only to GitHub's fixed API host; public access without a token is
+subject to GitHub's unauthenticated rate limits. Do not commit `.env`.
 
-## Example request
+The Semgrep adapter uses the `semgrep` console executable alongside the running
+Python interpreter. It does not use the deprecated `python -m semgrep` entry point.
+Semgrep fetches the maintained `p/security-audit` registry configuration, so live
+analysis requires access to GitHub and the Semgrep registry. No Semgrep account or
+token is required. A registry failure is a scanner error, not a clean result.
 
-Replace `owner/repo` and `123` with an actual public repository and PR number:
+Open [interactive API documentation](http://127.0.0.1:8000/docs).
 
 ```bash
 curl -X POST http://127.0.0.1:8000/api/v1/analyze \
   -H 'Content-Type: application/json' \
-  -d '{"repository":"owner/repo","pull_request_number":123}'
+  -d '{"repository":"PyCQA/bandit","pull_request_number":1116}'
 ```
 
-The service accepts `owner/repo`, not a URL. PR numbers must be positive integers.
-The caller waits for the response; there is no background job or persisted result.
-
-## Response contract
-
-Top-level metadata includes `repository`, `pull_request_number`, `title`, `author`
-(GitHub login, nullable for unavailable users), `base_branch`, `head_branch`,
-`head_sha`, `files_changed`, `python_files_scanned`, and `findings_count`.
-`files_changed` is GitHub's total across all file types; `python_files_scanned`
-counts files successfully processed by Bandit. `findings_count` counts returned
-findings. Counts are computed from the actual request, not performance estimates.
-
-Each item in `findings` contains:
-
-| Field | Meaning |
-| --- | --- |
-| `severity` | Bandit's LOW, MEDIUM, HIGH, or UNDEFINED rating |
-| `confidence` | Bandit's confidence rating, using the same enum |
-| `category` | Bandit test name (for example `blacklist`) |
-| `filename` | Repository-relative head-version filename |
-| `line_number` | One-based primary line reported by Bandit |
-| `description` | Bandit's issue description |
-| `source` | `bandit` |
-| `rule_id` | Bandit test ID |
-| `cwe_id` | CWE number when supplied by Bandit, otherwise null |
-| `is_on_changed_line` | true, false, or null, as described below |
-
-`scanned_files` records each successfully scanned filename and its
-`changed_line_ranges`: inclusive `[start, end]` pairs in head-file coordinates,
-`[]` for a verified patch containing no added lines, or `null` for unknown coverage.
-`skipped_files` gives filenames and reasons for deleted, unavailable, oversized,
-limit-excluded, or unparseable Python files. Non-Python files are outside scope and
-are not included in this list. `warnings` reports file-list and patch limitations.
-
-`analysis_complete` means the file listing was complete and all eligible,
-non-deleted Python files were scanned successfully. It does **not** mean that
-changed-line coverage is known, that the PR is safe, or that every vulnerability
-has been found. Check warnings and skipped files even when there are no findings.
-
-## Changed-line semantics
-
-Bandit scans the **complete head version** of each changed `.py` file. A unified
-patch separately maps added lines into that version; replacements count as added
-head lines plus deleted base lines. Removed lines have no head line to classify.
-
-- `true`: the finding's primary `line_number` is an added/replacement line.
-- `false`: a sufficiently validated patch exists, but that line is outside its
-  additions. The finding can still be relevant to review.
-- `null`: the patch is unavailable or cannot be validated reliably.
-
-**A finding on a changed line does not prove the PR introduced a vulnerability.**
-No baseline scan, data-flow comparison, or vulnerability-introduction analysis is
-implemented. For multi-line findings, only Bandit's primary line is classified.
-
-The parser checks hunk syntax and lengths, ordered non-overlapping hunks, total
-additions/deletions against GitHub's file metadata, and context/added text against
-the downloaded file. Missing patches, truncated hunks, omitted hunks detected by
-count mismatches, content mismatches, and unsupported encodings produce `null`
-for all findings in that file. Scanning still proceeds. Patch validation currently
-supports UTF-8 (including BOM); Bandit may scan other Python encodings while their
-changed-line coverage remains unknown. Rename-only files without patches also
-receive unknown coverage.
-
-GitHub does not guarantee an atomic snapshot across paginated PR-file requests.
-The service checks base/head SHAs and total file count again after retrieval and
-returns HTTP 409 if they changed. This detects ordinary concurrent updates but
-cannot rule out every race or an internally inconsistent upstream response.
-Counts and content checks are conservative validation, not a guarantee against
-arbitrary upstream patch corruption.
+The request still accepts `owner/repo` and a positive integer PR number. The caller
+waits for the response; nothing is persisted by the service.
 
 ## Architecture
 
 ```text
-HTTP request → API route → analysis service → GitHub REST API
-                              ↓
-                        patch parsing
-                              ↓
-                        Bandit subprocess
-                              ↓
-                     Pydantic JSON response
+POST /api/v1/analyze
+  → GitHub metadata and paginated changed files
+  → full Python contents at captured head SHA + validated patch line ranges
+  → scanner runner
+      → Bandit adapter → normalized scanner result
+      → Semgrep adapter → normalized scanner result
+  → conservative deduplication → changed-line classification
+  → metadata, evidence, coverage, metrics, errors as JSON
 ```
 
-| File | Responsibility |
+| Module | Responsibility |
 | --- | --- |
-| `app/main.py` | FastAPI application and route registration |
+| `app/main.py` | FastAPI application |
 | `app/config.py` | Validated environment settings |
-| `app/models.py` | Request, finding, file-coverage and response schemas |
-| `app/api/routes.py` | HTTP endpoint, dependency wiring and error mapping |
-| `app/integrations/github.py` | PR metadata, pagination, bounded content downloads |
-| `app/services/analysis.py` | File selection, retrieval, scan coordination, metadata and coverage |
-| `app/services/patches.py` | Conservative patch parsing and inclusive line ranges |
-| `app/scanners/bandit.py` | Temporary-file handling, Bandit execution and normalization |
-| `tests/conftest.py` | Shared mocked PR and settings fixtures |
-| `tests/test_api.py` | HTTP responses, validation and errors |
-| `tests/test_github.py` | Mocked REST behavior and download limits |
-| `tests/test_analysis.py` | Orchestration, coverage, metadata and partial results |
-| `tests/test_patches.py` | Patch parsing, truncation and coordinate cases |
-| `tests/test_bandit.py` | Real scanner checks and simulated scanner failures |
-| `app/**/__init__.py` | Python package markers |
-| `pyproject.toml` | Packaging, dependencies, Python version and pytest configuration |
-| `.env.example` | Documented environment defaults |
-| `.gitignore` | Local secrets, virtual environments and generated-file exclusions |
+| `app/models.py` | Common findings, evidence, coverage, metadata and API schemas |
+| `app/api/routes.py` | Endpoint, dependencies and HTTP error mapping |
+| `app/integrations/github.py` | GitHub metadata, pagination, bounded downloads |
+| `app/scanners/base.py` | Common scanner interface and result |
+| `app/scanners/bandit.py` | Bandit invocation, normalization and file errors |
+| `app/scanners/semgrep.py` | Semgrep invocation, normalization and file coverage |
+| `app/scanners/runner.py` | Select and run scanners independently |
+| `app/services/analysis.py` | Retrieval, orchestration and response assembly |
+| `app/services/patches.py` | Conservative unified-diff validation |
+| `app/services/dedup.py` | Explicit cross-scanner equivalence matching |
 
-File contents are requested at the captured head SHA, using the fork repository
-when applicable. GitHub-supplied raw/download URLs are never followed. Repository
-paths are mapped to generated temporary filenames, preventing local path
-traversal. Bandit receives an application-owned configuration and ignores `nosec`
-comments so repository content cannot suppress checks. The repository is never
-cloned, imported, installed or executed. A temporary directory is filesystem
-isolation, **not an OS sandbox** for the scanner process.
+Scanners run sequentially off the event loop. Each uses generated filenames in a
+fresh temporary directory, subprocess argument lists without a shell, an explicit
+configuration, and an execution timeout. Repository code is never imported,
+installed, or executed. Repository configuration and `nosec`/`nosemgrep`
+suppressions are not honored. Semgrep uses local Community Edition scanning;
+metrics and version checks are disabled. Temporary settings/logs are cleaned up,
+and GitHub/Semgrep token environment variables are not passed to Semgrep.
+A temporary directory is not an OS sandbox for the scanner process.
 
-Network I/O is asynchronous; the Bandit subprocess runs off the event loop. It has
-a timeout and runs without a shell. Temporary files are removed on success or
-failure. Syntax errors are reported as skipped files rather than clean scans.
-Scanner startup failures, invalid reports and timeouts fail the request.
+GitHub-provided download URLs are not followed. Contents are requested from the
+fork repository when applicable, pinned to the captured head SHA. Base/head SHAs
+and changed-file count are rechecked after retrieval; observed changes return 409.
+This detects normal concurrent updates but cannot guarantee an atomic snapshot
+across GitHub's separate paginated requests.
+
+## Findings and compatibility
+
+Existing PR metadata remains: `repository`, `pull_request_number`, `title`,
+`author` (nullable GitHub login), `base_branch`, `head_branch`, `head_sha`,
+`files_changed`, `python_files_scanned`, and `findings_count`.
+
+Each finding contains:
+
+| Field | Meaning |
+| --- | --- |
+| `severity` | LOW, MEDIUM, HIGH or UNDEFINED |
+| `confidence` | Scanner-provided normalized confidence, or null when unavailable |
+| `category` | Representative scanner category/test name |
+| `filename`, `line_number` | Repository filename and one-based primary line |
+| `description` | Representative scanner message |
+| `sources` | All contributing scanner names |
+| `rule_ids` | All contributing rule IDs |
+| `cwe_ids` | Normalized CWE strings, e.g. `CWE-78`; empty when unavailable |
+| `evidence` | Each scanner's source, rule, category, original severity/confidence, message and CWE IDs |
+| `is_on_changed_line` | true, false or null |
+
+The v0.1 singular `source`, `rule_id`, and integer-or-null `cwe_id` remain as
+compatibility fields identifying the representative finding. For a merged pair,
+Bandit is the representative; Semgrep-only findings identify Semgrep. Existing
+clients must allow `source="semgrep"` and nullable confidence. Plural fields and
+evidence are authoritative for merged attribution; singular fields cannot describe
+all contributing scanners. Evidence preserves rule/source associations.
+
+Bandit severity and confidence retain their meanings. Semgrep ERROR/WARNING/INFO
+map to HIGH/MEDIUM/LOW. Native HIGH/MEDIUM/LOW map directly, CRITICAL maps to HIGH,
+and unknown values map to UNDEFINED. These are display normalization conventions,
+not assertions that the scanners' risk ratings are equivalent. Missing or unknown
+Semgrep confidence normalizes to null; raw confidence is retained in evidence.
+
+`findings_count` counts final deduplicated findings rather than Bandit-only results.
+`python_files_scanned` counts distinct files successfully scanned by at least one
+scanner. Per-scanner coverage appears in `scanner_metadata`.
+
+## Conservative deduplication
+
+A pair is merged only if **all** conditions hold:
+
+1. Different scanners (Bandit and Semgrep).
+2. Exact same repository filename.
+3. Exact same primary line number; adjacent lines do not match.
+4. At least one shared normalized CWE.
+5. An explicit equivalence mapping between the two rule IDs.
+6. Each finding has exactly one eligible counterpart; ambiguous matches stay separate.
+
+The initial mapping is Bandit `B602` ↔ Semgrep
+`python.lang.security.audit.subprocess-shell-true.subprocess-shell-true`.
+The Semgrep rule explicitly references B602 in its upstream metadata. It detects a
+subset of shell=True calls; both scanners still must report the same primary line
+and CWE before merging. Rules with similar wording, generic categories, or a
+shared CWE alone are not mapped automatically. No transitive clustering occurs.
+
+Merges union sources, rules and CWEs, keep the strongest normalized severity, retain
+all evidence, and keep representative confidence without implying extra certainty.
+Input findings are not mutated. This intentionally misses duplicates. Same-line
+matching plus a rule mapping still cannot prove semantic identity in every program;
+multiple statements on one line and evolving upstream rules remain limitations.
+
+## Changed-line semantics
+
+Bandit and Semgrep analyze the **complete head version** of each changed `.py`
+file, including existing code. Added/replacement lines are identified separately
+from GitHub's patch. Classification happens after deduplication:
+
+- `true`: the finding's primary line is added/replaced by the PR.
+- `false`: a validated patch exists and the primary line is outside additions.
+- `null`: coverage cannot be determined reliably.
+
+**On a changed line does not mean introduced by the PR.** No baseline analysis is
+performed. Multi-line findings use the scanner's primary line only. Exact-line
+merging preserves this coordinate. Deleted lines have no head coordinate.
+
+`scanned_files[].changed_line_ranges` contains inclusive `[start,end]` pairs,
+`[]` when a verified patch has no additions, or null for unknown coverage. The
+parser checks hunk lengths/order, additions/deletions against GitHub metadata, and
+context/added text against downloaded content. Missing/truncated/count-mismatched
+patches or content mismatches produce null. Patch decoding supports UTF-8 including
+BOM; other Python encodings can still be scanned but have unknown line coverage.
+Rename-only files without patches also have unknown coverage.
+
+## Metrics, coverage and errors
+
+- `raw_findings_count`: normalized findings returned by scanners before merging.
+- `deduplicated_findings_count`: final count, equal to `findings_count`.
+- `findings_on_changed_lines`: final findings whose classification is true.
+- `findings_by_scanner`: raw counts; a failed scanner's zero is not a clean scan.
+- `findings_by_severity`: final counts for severities present in the response.
+- `scanner_errors`: scanner, kind, optional filename, sanitized explanation.
+- `scanner_metadata`: scanner version, configuration identity, completed flag and
+  successfully scanned repository filenames. `completed` means an execution
+  produced a usable report; inspect errors for partial file/rule failures.
+
+`analysis_complete` requires a complete GitHub listing and successful coverage of
+all downloaded eligible files by **both** scanners, with no scanner errors and no
+eligible Python files excluded during download. Unknown patch coverage is reported
+in warnings and does not by itself make scanning incomplete. A complete scan does
+not imply that the code is safe or that every vulnerability was found.
+
+`skipped_files` lists deleted/unavailable/limit-excluded Python files and files no
+scanner successfully processed. Scanner-specific failures remain in
+`scanner_errors`, even if another scanner succeeded. Non-Python files are outside
+scope. Legitimate findings from a partial report remain visible with its errors.
+One failed scanner returns HTTP 200 with available results and incomplete status;
+if neither scanner completes, the request fails with HTTP 502. No-file requests
+return empty successful results without launching scanners.
+
+Tool versions come from installed package metadata and, for Semgrep, its actual
+JSON report when available. Configuration identity is `p/security-audit` for
+Semgrep and the application-owned defaults for Bandit. No registry ruleset version
+is invented. The registry is mutable: configuration identity and tool versions
+help auditing but do not guarantee bit-for-bit reproduction of future scans.
+Dependencies are version-bounded rather than fully locked.
 
 ## Configuration and limits
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
-| `GITHUB_TOKEN` | unset | Optional GitHub API token |
-| `GITHUB_TIMEOUT_SECONDS` | 20 | Per-network-operation HTTP timeout |
-| `SCAN_TIMEOUT_SECONDS` | 30 | Bandit subprocess timeout |
-| `MAX_PYTHON_FILES` | 50 | Maximum files submitted to Bandit per request |
-| `MAX_FILE_BYTES` | 500000 | Maximum content bytes for one file |
-| `MAX_TOTAL_BYTES` | 5000000 | Maximum retained content bytes per request |
+| `GITHUB_TOKEN` | unset | Optional public GitHub API credentials |
+| `GITHUB_TIMEOUT_SECONDS` | 20 | Per-network-operation timeout |
+| `SCAN_TIMEOUT_SECONDS` | 30 | Bandit process timeout |
+| `SEMGREP_TIMEOUT_SECONDS` | 120 | Semgrep process timeout, including registry retrieval |
+| `MAX_PYTHON_FILES` | 50 | Maximum downloaded Python files per request |
+| `MAX_FILE_BYTES` | 500000 | Per-file content limit |
+| `MAX_TOTAL_BYTES` | 5000000 | Retained content limit per request |
 
-GitHub PR-file pagination is limited to 3,000 entries. If the number retrieved does
-not match PR metadata, results are explicitly marked incomplete. Downloads are
-bounded while streaming; each metadata response also has a 20 MB cap. Limit-excluded
-Python files are reported as skipped. Limits apply per request; there is no global
-admission control, process memory sandbox, or overall request deadline. This
-version is intended for local use and does not implement a public hosted service.
+GitHub exposes at most 3,000 changed files; mismatches with PR metadata are reported
+as incomplete. Downloads are bounded while streaming; metadata has a 20 MB
+per-response cap. Limits are per request: no global admission control, OS memory
+sandbox, or overall request deadline is implemented. Scanners see generated `.py`
+paths, so path-dependent rules do not retain original directory context. Whole-
+repository and cross-file context outside downloaded files is unavailable.
 
-Expected errors use FastAPI's `{"detail": "..."}` format:
+Expected HTTP errors: 400 unsupported private repository, 404 unavailable repo/PR,
+409 moving PR, 422 invalid input, 429 GitHub rate limit, 502 upstream/all-scanner
+failure, and 504 GitHub timeout. Individual unavailable files yield partial results.
 
-| Status | Meaning |
-| --- | --- |
-| 400 | Private repository outside supported scope |
-| 404 | Repository or PR not found/accessible |
-| 409 | PR changed during retrieval; retry |
-| 422 | Invalid request input |
-| 429 | GitHub rate limit exceeded |
-| 502 | Upstream error or scanner failure/timeout |
-| 504 | GitHub network timeout |
-
-Individual unavailable head files produce partial results. Other upstream failures
-abort the request. Bandit is a heuristic Python static analyzer: findings require
-human review, and false positives and false negatives are possible. Full-file
-scanning can report pre-existing issues. This version has no LLM, frontend,
-database, authentication, additional scanner, background jobs, or deployment
-infrastructure.
-
-## Tests
+## Testing and live examples
 
 ```bash
 python -m pytest -q
 ```
 
-Tests use mocked GitHub HTTP responses and do not require network access or a
-token. Scanner and API/service tests also execute the installed Bandit on small,
-locally authored fixture snippets; those snippets are never executed as Python.
-Test results should be taken from an actual local run. The suite does not prove
-live GitHub availability or compatibility with every supported Python version.
+Tests cover v0.1 behavior, scanner normalization/failures/timeouts, exact matching,
+ambiguous/nonmatching pairs, evidence, severity, changed-line classification,
+coverage and partial failures. GitHub and registry access are mocked in automated
+tests; real Bandit tests run locally. Semgrep adapter tests inspect command safety
+and emulate JSON reports. Live validation exercises both installed scanners with
+GitHub and the maintained registry configuration.
 
-References: [GitHub PR REST API](https://docs.github.com/en/rest/pulls/pulls),
-[GitHub repository contents API](https://docs.github.com/en/rest/repos/contents),
-and [Bandit JSON output](https://bandit.readthedocs.io/en/latest/formatters/json.html).
+`examples/live_analysis.json` preserves the v0.1 public PR response.
+`examples/live_analysis_v0_2.json` records the v0.2 response for the same
+[PyCQA/bandit PR #1116](https://github.com/PyCQA/bandit/pull/1116). Its intentionally
+unsafe scanner examples are useful fixtures, not evidence of production exploits.
+See `examples/live_validation_v0_2.md` for actual versions, counts and measured
+request duration. Runtime is a single observation, not a benchmark.
+
+References: [GitHub PR API](https://docs.github.com/en/rest/pulls/pulls),
+[Bandit JSON](https://bandit.readthedocs.io/en/latest/formatters/json.html),
+[Semgrep audit rule](https://github.com/semgrep/semgrep-rules/blob/develop/python/lang/security/audit/subprocess-shell-true.yaml).

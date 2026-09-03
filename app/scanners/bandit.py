@@ -5,10 +5,8 @@ import sys
 from tempfile import TemporaryDirectory
 
 from app.models import Finding
-
-
-class ScanError(Exception):
-    pass
+from app.scanners.base import ScanError, ScannerError, ScannerResult
+from importlib.metadata import version, PackageNotFoundError
 
 
 def scan_files(files: dict[str, bytes], timeout: float) -> tuple[list[Finding], dict[str, str]]:
@@ -51,3 +49,23 @@ def scan_files(files: dict[str, bytes], timeout: float) -> tuple[list[Finding], 
             return findings, errors
         except (ValueError, KeyError, TypeError) as exc:
             raise ScanError("Bandit returned an invalid report.") from exc
+
+
+def scan(files: dict[str, bytes], timeout: float) -> ScannerResult:
+    try:
+        tool_version = version("bandit")
+    except PackageNotFoundError:
+        tool_version = None
+    result = ScannerResult(scanner="bandit", version=tool_version,
+                           config_identity="application defaults; ignore-nosec")
+    try:
+        findings, errors = scan_files(files, timeout)
+        result.findings = [f for f in findings if f.filename not in errors]
+        result.scanned_files = sorted(set(files) - set(errors))
+        result.errors = [ScannerError(scanner="bandit", kind="file_error", filename=name,
+                                     message="Bandit: " + reason) for name, reason in errors.items()]
+    except ScanError as exc:
+        result.completed = False
+        result.errors = [ScannerError(scanner="bandit", kind="timeout" if "timed out" in str(exc) else "execution_error",
+                                      message=str(exc))]
+    return result

@@ -1,0 +1,1329 @@
+{
+  "repository": "PyCQA/bandit",
+  "pull_request_number": 1116,
+  "title": "[B605] Add functions that are vulnerable to shell injection.",
+  "author": "shihai1991",
+  "base_branch": "main",
+  "head_branch": "extend_injection_shell",
+  "head_sha": "071a539fae6fc4652d276523c1e772f402437b2f",
+  "files_changed": 3,
+  "python_files_scanned": 3,
+  "findings_count": 35,
+  "findings": [
+    {
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "category": "blacklist",
+      "filename": "examples/subprocess_shell.py",
+      "line_number": 1,
+      "description": "Consider possible security implications associated with the subprocess module.",
+      "source": "bandit",
+      "rule_id": "B404",
+      "cwe_id": 78,
+      "is_on_changed_line": false,
+      "sources": [
+        "bandit"
+      ],
+      "rule_ids": [
+        "B404"
+      ],
+      "cwe_ids": [
+        "CWE-78"
+      ],
+      "evidence": [
+        {
+          "source": "bandit",
+          "rule_id": "B404",
+          "category": "blacklist",
+          "severity": "LOW",
+          "confidence": "HIGH",
+          "description": "Consider possible security implications associated with the subprocess module.",
+          "cwe_ids": [
+            "CWE-78"
+          ]
+        }
+      ]
+    },
+    {
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "category": "blacklist",
+      "filename": "examples/subprocess_shell.py",
+      "line_number": 2,
+      "description": "Consider possible security implications associated with the subprocess module.",
+      "source": "bandit",
+      "rule_id": "B404",
+      "cwe_id": 78,
+      "is_on_changed_line": false,
+      "sources": [
+        "bandit"
+      ],
+      "rule_ids": [
+        "B404"
+      ],
+      "cwe_ids": [
+        "CWE-78"
+      ],
+      "evidence": [
+        {
+          "source": "bandit",
+          "rule_id": "B404",
+          "category": "blacklist",
+          "severity": "LOW",
+          "confidence": "HIGH",
+          "description": "Consider possible security implications associated with the subprocess module.",
+          "cwe_ids": [
+            "CWE-78"
+          ]
+        }
+      ]
+    },
+    {
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "category": "subprocess_popen_with_shell_equals_true",
+      "filename": "examples/subprocess_shell.py",
+      "line_number": 11,
+      "description": "subprocess call with shell=True seems safe, but may be changed in the future, consider rewriting without shell",
+      "source": "bandit",
+      "rule_id": "B602",
+      "cwe_id": 78,
+      "is_on_changed_line": false,
+      "sources": [
+        "bandit"
+      ],
+      "rule_ids": [
+        "B602"
+      ],
+      "cwe_ids": [
+        "CWE-78"
+      ],
+      "evidence": [
+        {
+          "source": "bandit",
+          "rule_id": "B602",
+          "category": "subprocess_popen_with_shell_equals_true",
+          "severity": "LOW",
+          "confidence": "HIGH",
+          "description": "subprocess call with shell=True seems safe, but may be changed in the future, consider rewriting without shell",
+          "cwe_ids": [
+            "CWE-78"
+          ]
+        }
+      ]
+    },
+    {
+      "severity": "MEDIUM",
+      "confidence": "LOW",
+      "category": "any_other_function_with_shell_equals_true",
+      "filename": "examples/subprocess_shell.py",
+      "line_number": 12,
+      "description": "Function call with shell=True parameter identified, possible security issue.",
+      "source": "bandit",
+      "rule_id": "B604",
+      "cwe_id": 78,
+      "is_on_changed_line": false,
+      "sources": [
+        "bandit"
+      ],
+      "rule_ids": [
+        "B604"
+      ],
+      "cwe_ids": [
+        "CWE-78"
+      ],
+      "evidence": [
+        {
+          "source": "bandit",
+          "rule_id": "B604",
+          "category": "any_other_function_with_shell_equals_true",
+          "severity": "MEDIUM",
+          "confidence": "LOW",
+          "description": "Function call with shell=True parameter identified, possible security issue.",
+          "cwe_ids": [
+            "CWE-78"
+          ]
+        }
+      ]
+    },
+    {
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "category": "subprocess_popen_with_shell_equals_true",
+      "filename": "examples/subprocess_shell.py",
+      "line_number": 14,
+      "description": "subprocess call with shell=True seems safe, but may be changed in the future, consider rewriting without shell",
+      "source": "bandit",
+      "rule_id": "B602",
+      "cwe_id": 78,
+      "is_on_changed_line": false,
+      "sources": [
+        "bandit"
+      ],
+      "rule_ids": [
+        "B602"
+      ],
+      "cwe_ids": [
+        "CWE-78"
+      ],
+      "evidence": [
+        {
+          "source": "bandit",
+          "rule_id": "B602",
+          "category": "subprocess_popen_with_shell_equals_true",
+          "severity": "LOW",
+          "confidence": "HIGH",
+          "description": "subprocess call with shell=True seems safe, but may be changed in the future, consider rewriting without shell",
+          "cwe_ids": [
+            "CWE-78"
+          ]
+        }
+      ]
+    },
+    {
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "category": "subprocess_without_shell_equals_true",
+      "filename": "examples/subprocess_shell.py",
+      "line_number": 15,
+      "description": "subprocess call - check for execution of untrusted input.",
+      "source": "bandit",
+      "rule_id": "B603",
+      "cwe_id": 78,
+      "is_on_changed_line": false,
+      "sources": [
+        "bandit"
+      ],
+      "rule_ids": [
+        "B603"
+      ],
+      "cwe_ids": [
+        "CWE-78"
+      ],
+      "evidence": [
+        {
+          "source": "bandit",
+          "rule_id": "B603",
+          "category": "subprocess_without_shell_equals_true",
+          "severity": "LOW",
+          "confidence": "HIGH",
+          "description": "subprocess call - check for execution of untrusted input.",
+          "cwe_ids": [
+            "CWE-78"
+          ]
+        }
+      ]
+    },
+    {
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "category": "subprocess_without_shell_equals_true",
+      "filename": "examples/subprocess_shell.py",
+      "line_number": 16,
+      "description": "subprocess call - check for execution of untrusted input.",
+      "source": "bandit",
+      "rule_id": "B603",
+      "cwe_id": 78,
+      "is_on_changed_line": false,
+      "sources": [
+        "bandit"
+      ],
+      "rule_ids": [
+        "B603"
+      ],
+      "cwe_ids": [
+        "CWE-78"
+      ],
+      "evidence": [
+        {
+          "source": "bandit",
+          "rule_id": "B603",
+          "category": "subprocess_without_shell_equals_true",
+          "severity": "LOW",
+          "confidence": "HIGH",
+          "description": "subprocess call - check for execution of untrusted input.",
+          "cwe_ids": [
+            "CWE-78"
+          ]
+        }
+      ]
+    },
+    {
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "category": "subprocess_without_shell_equals_true",
+      "filename": "examples/subprocess_shell.py",
+      "line_number": 18,
+      "description": "subprocess call - check for execution of untrusted input.",
+      "source": "bandit",
+      "rule_id": "B603",
+      "cwe_id": 78,
+      "is_on_changed_line": false,
+      "sources": [
+        "bandit"
+      ],
+      "rule_ids": [
+        "B603"
+      ],
+      "cwe_ids": [
+        "CWE-78"
+      ],
+      "evidence": [
+        {
+          "source": "bandit",
+          "rule_id": "B603",
+          "category": "subprocess_without_shell_equals_true",
+          "severity": "LOW",
+          "confidence": "HIGH",
+          "description": "subprocess call - check for execution of untrusted input.",
+          "cwe_ids": [
+            "CWE-78"
+          ]
+        }
+      ]
+    },
+    {
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "category": "subprocess_popen_with_shell_equals_true",
+      "filename": "examples/subprocess_shell.py",
+      "line_number": 21,
+      "description": "subprocess call with shell=True seems safe, but may be changed in the future, consider rewriting without shell",
+      "source": "bandit",
+      "rule_id": "B602",
+      "cwe_id": 78,
+      "is_on_changed_line": false,
+      "sources": [
+        "bandit"
+      ],
+      "rule_ids": [
+        "B602"
+      ],
+      "cwe_ids": [
+        "CWE-78"
+      ],
+      "evidence": [
+        {
+          "source": "bandit",
+          "rule_id": "B602",
+          "category": "subprocess_popen_with_shell_equals_true",
+          "severity": "LOW",
+          "confidence": "HIGH",
+          "description": "subprocess call with shell=True seems safe, but may be changed in the future, consider rewriting without shell",
+          "cwe_ids": [
+            "CWE-78"
+          ]
+        }
+      ]
+    },
+    {
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "category": "subprocess_without_shell_equals_true",
+      "filename": "examples/subprocess_shell.py",
+      "line_number": 23,
+      "description": "subprocess call - check for execution of untrusted input.",
+      "source": "bandit",
+      "rule_id": "B603",
+      "cwe_id": 78,
+      "is_on_changed_line": false,
+      "sources": [
+        "bandit"
+      ],
+      "rule_ids": [
+        "B603"
+      ],
+      "cwe_ids": [
+        "CWE-78"
+      ],
+      "evidence": [
+        {
+          "source": "bandit",
+          "rule_id": "B603",
+          "category": "subprocess_without_shell_equals_true",
+          "severity": "LOW",
+          "confidence": "HIGH",
+          "description": "subprocess call - check for execution of untrusted input.",
+          "cwe_ids": [
+            "CWE-78"
+          ]
+        }
+      ]
+    },
+    {
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "category": "subprocess_popen_with_shell_equals_true",
+      "filename": "examples/subprocess_shell.py",
+      "line_number": 24,
+      "description": "subprocess call with shell=True seems safe, but may be changed in the future, consider rewriting without shell",
+      "source": "bandit",
+      "rule_id": "B602",
+      "cwe_id": 78,
+      "is_on_changed_line": false,
+      "sources": [
+        "bandit"
+      ],
+      "rule_ids": [
+        "B602"
+      ],
+      "cwe_ids": [
+        "CWE-78"
+      ],
+      "evidence": [
+        {
+          "source": "bandit",
+          "rule_id": "B602",
+          "category": "subprocess_popen_with_shell_equals_true",
+          "severity": "LOW",
+          "confidence": "HIGH",
+          "description": "subprocess call with shell=True seems safe, but may be changed in the future, consider rewriting without shell",
+          "cwe_ids": [
+            "CWE-78"
+          ]
+        }
+      ]
+    },
+    {
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "category": "subprocess_without_shell_equals_true",
+      "filename": "examples/subprocess_shell.py",
+      "line_number": 26,
+      "description": "subprocess call - check for execution of untrusted input.",
+      "source": "bandit",
+      "rule_id": "B603",
+      "cwe_id": 78,
+      "is_on_changed_line": false,
+      "sources": [
+        "bandit"
+      ],
+      "rule_ids": [
+        "B603"
+      ],
+      "cwe_ids": [
+        "CWE-78"
+      ],
+      "evidence": [
+        {
+          "source": "bandit",
+          "rule_id": "B603",
+          "category": "subprocess_without_shell_equals_true",
+          "severity": "LOW",
+          "confidence": "HIGH",
+          "description": "subprocess call - check for execution of untrusted input.",
+          "cwe_ids": [
+            "CWE-78"
+          ]
+        }
+      ]
+    },
+    {
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "category": "subprocess_popen_with_shell_equals_true",
+      "filename": "examples/subprocess_shell.py",
+      "line_number": 27,
+      "description": "subprocess call with shell=True seems safe, but may be changed in the future, consider rewriting without shell",
+      "source": "bandit",
+      "rule_id": "B602",
+      "cwe_id": 78,
+      "is_on_changed_line": false,
+      "sources": [
+        "bandit"
+      ],
+      "rule_ids": [
+        "B602"
+      ],
+      "cwe_ids": [
+        "CWE-78"
+      ],
+      "evidence": [
+        {
+          "source": "bandit",
+          "rule_id": "B602",
+          "category": "subprocess_popen_with_shell_equals_true",
+          "severity": "LOW",
+          "confidence": "HIGH",
+          "description": "subprocess call with shell=True seems safe, but may be changed in the future, consider rewriting without shell",
+          "cwe_ids": [
+            "CWE-78"
+          ]
+        }
+      ]
+    },
+    {
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "category": "start_process_with_a_shell",
+      "filename": "examples/subprocess_shell.py",
+      "line_number": 29,
+      "description": "Starting a process with a shell: Seems safe, but may be changed in the future, consider rewriting without shell",
+      "source": "bandit",
+      "rule_id": "B605",
+      "cwe_id": 78,
+      "is_on_changed_line": true,
+      "sources": [
+        "bandit"
+      ],
+      "rule_ids": [
+        "B605"
+      ],
+      "cwe_ids": [
+        "CWE-78"
+      ],
+      "evidence": [
+        {
+          "source": "bandit",
+          "rule_id": "B605",
+          "category": "start_process_with_a_shell",
+          "severity": "LOW",
+          "confidence": "HIGH",
+          "description": "Starting a process with a shell: Seems safe, but may be changed in the future, consider rewriting without shell",
+          "cwe_ids": [
+            "CWE-78"
+          ]
+        }
+      ]
+    },
+    {
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "category": "start_process_with_a_shell",
+      "filename": "examples/subprocess_shell.py",
+      "line_number": 30,
+      "description": "Starting a process with a shell: Seems safe, but may be changed in the future, consider rewriting without shell",
+      "source": "bandit",
+      "rule_id": "B605",
+      "cwe_id": 78,
+      "is_on_changed_line": true,
+      "sources": [
+        "bandit"
+      ],
+      "rule_ids": [
+        "B605"
+      ],
+      "cwe_ids": [
+        "CWE-78"
+      ],
+      "evidence": [
+        {
+          "source": "bandit",
+          "rule_id": "B605",
+          "category": "start_process_with_a_shell",
+          "severity": "LOW",
+          "confidence": "HIGH",
+          "description": "Starting a process with a shell: Seems safe, but may be changed in the future, consider rewriting without shell",
+          "cwe_ids": [
+            "CWE-78"
+          ]
+        }
+      ]
+    },
+    {
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "category": "subprocess_without_shell_equals_true",
+      "filename": "examples/subprocess_shell.py",
+      "line_number": 32,
+      "description": "subprocess call - check for execution of untrusted input.",
+      "source": "bandit",
+      "rule_id": "B603",
+      "cwe_id": 78,
+      "is_on_changed_line": false,
+      "sources": [
+        "bandit"
+      ],
+      "rule_ids": [
+        "B603"
+      ],
+      "cwe_ids": [
+        "CWE-78"
+      ],
+      "evidence": [
+        {
+          "source": "bandit",
+          "rule_id": "B603",
+          "category": "subprocess_without_shell_equals_true",
+          "severity": "LOW",
+          "confidence": "HIGH",
+          "description": "subprocess call - check for execution of untrusted input.",
+          "cwe_ids": [
+            "CWE-78"
+          ]
+        }
+      ]
+    },
+    {
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "category": "subprocess_popen_with_shell_equals_true",
+      "filename": "examples/subprocess_shell.py",
+      "line_number": 33,
+      "description": "subprocess call with shell=True seems safe, but may be changed in the future, consider rewriting without shell",
+      "source": "bandit",
+      "rule_id": "B602",
+      "cwe_id": 78,
+      "is_on_changed_line": false,
+      "sources": [
+        "bandit"
+      ],
+      "rule_ids": [
+        "B602"
+      ],
+      "cwe_ids": [
+        "CWE-78"
+      ],
+      "evidence": [
+        {
+          "source": "bandit",
+          "rule_id": "B602",
+          "category": "subprocess_popen_with_shell_equals_true",
+          "severity": "LOW",
+          "confidence": "HIGH",
+          "description": "subprocess call with shell=True seems safe, but may be changed in the future, consider rewriting without shell",
+          "cwe_ids": [
+            "CWE-78"
+          ]
+        }
+      ]
+    },
+    {
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "category": "subprocess_popen_with_shell_equals_true",
+      "filename": "examples/subprocess_shell.py",
+      "line_number": 35,
+      "description": "subprocess call with shell=True seems safe, but may be changed in the future, consider rewriting without shell",
+      "source": "bandit",
+      "rule_id": "B602",
+      "cwe_id": 78,
+      "is_on_changed_line": false,
+      "sources": [
+        "bandit"
+      ],
+      "rule_ids": [
+        "B602"
+      ],
+      "cwe_ids": [
+        "CWE-78"
+      ],
+      "evidence": [
+        {
+          "source": "bandit",
+          "rule_id": "B602",
+          "category": "subprocess_popen_with_shell_equals_true",
+          "severity": "LOW",
+          "confidence": "HIGH",
+          "description": "subprocess call with shell=True seems safe, but may be changed in the future, consider rewriting without shell",
+          "cwe_ids": [
+            "CWE-78"
+          ]
+        }
+      ]
+    },
+    {
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "category": "subprocess_popen_with_shell_equals_true",
+      "filename": "examples/subprocess_shell.py",
+      "line_number": 36,
+      "description": "subprocess call with shell=True identified, security issue.",
+      "source": "bandit",
+      "rule_id": "B602",
+      "cwe_id": 78,
+      "is_on_changed_line": false,
+      "sources": [
+        "bandit",
+        "semgrep"
+      ],
+      "rule_ids": [
+        "B602",
+        "python.lang.security.audit.subprocess-shell-true.subprocess-shell-true"
+      ],
+      "cwe_ids": [
+        "CWE-78"
+      ],
+      "evidence": [
+        {
+          "source": "bandit",
+          "rule_id": "B602",
+          "category": "subprocess_popen_with_shell_equals_true",
+          "severity": "HIGH",
+          "confidence": "HIGH",
+          "description": "subprocess call with shell=True identified, security issue.",
+          "cwe_ids": [
+            "CWE-78"
+          ]
+        },
+        {
+          "source": "semgrep",
+          "rule_id": "python.lang.security.audit.subprocess-shell-true.subprocess-shell-true",
+          "category": "['secure default']",
+          "severity": "ERROR",
+          "confidence": "MEDIUM",
+          "description": "Found 'subprocess' function 'Popen' with 'shell=True'. This is dangerous because this call will spawn the command using a shell process. Doing so propagates current shell settings and variables, which makes it much easier for a malicious actor to execute commands. Use 'shell=False' instead.",
+          "cwe_ids": [
+            "CWE-78"
+          ]
+        }
+      ]
+    },
+    {
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "category": "subprocess_popen_with_shell_equals_true",
+      "filename": "examples/subprocess_shell.py",
+      "line_number": 37,
+      "description": "subprocess call with shell=True identified, security issue.",
+      "source": "bandit",
+      "rule_id": "B602",
+      "cwe_id": 78,
+      "is_on_changed_line": false,
+      "sources": [
+        "bandit",
+        "semgrep"
+      ],
+      "rule_ids": [
+        "B602",
+        "python.lang.security.audit.subprocess-shell-true.subprocess-shell-true"
+      ],
+      "cwe_ids": [
+        "CWE-78"
+      ],
+      "evidence": [
+        {
+          "source": "bandit",
+          "rule_id": "B602",
+          "category": "subprocess_popen_with_shell_equals_true",
+          "severity": "HIGH",
+          "confidence": "HIGH",
+          "description": "subprocess call with shell=True identified, security issue.",
+          "cwe_ids": [
+            "CWE-78"
+          ]
+        },
+        {
+          "source": "semgrep",
+          "rule_id": "python.lang.security.audit.subprocess-shell-true.subprocess-shell-true",
+          "category": "['secure default']",
+          "severity": "ERROR",
+          "confidence": "MEDIUM",
+          "description": "Found 'subprocess' function 'Popen' with 'shell=True'. This is dangerous because this call will spawn the command using a shell process. Doing so propagates current shell settings and variables, which makes it much easier for a malicious actor to execute commands. Use 'shell=False' instead.",
+          "cwe_ids": [
+            "CWE-78"
+          ]
+        }
+      ]
+    },
+    {
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "category": "subprocess_popen_with_shell_equals_true",
+      "filename": "examples/subprocess_shell.py",
+      "line_number": 40,
+      "description": "subprocess call with shell=True identified, security issue.",
+      "source": "bandit",
+      "rule_id": "B602",
+      "cwe_id": 78,
+      "is_on_changed_line": false,
+      "sources": [
+        "bandit",
+        "semgrep"
+      ],
+      "rule_ids": [
+        "B602",
+        "python.lang.security.audit.subprocess-shell-true.subprocess-shell-true"
+      ],
+      "cwe_ids": [
+        "CWE-78"
+      ],
+      "evidence": [
+        {
+          "source": "bandit",
+          "rule_id": "B602",
+          "category": "subprocess_popen_with_shell_equals_true",
+          "severity": "HIGH",
+          "confidence": "HIGH",
+          "description": "subprocess call with shell=True identified, security issue.",
+          "cwe_ids": [
+            "CWE-78"
+          ]
+        },
+        {
+          "source": "semgrep",
+          "rule_id": "python.lang.security.audit.subprocess-shell-true.subprocess-shell-true",
+          "category": "['secure default']",
+          "severity": "ERROR",
+          "confidence": "MEDIUM",
+          "description": "Found 'subprocess' function 'Popen' with 'shell=True'. This is dangerous because this call will spawn the command using a shell process. Doing so propagates current shell settings and variables, which makes it much easier for a malicious actor to execute commands. Use 'shell=False' instead.",
+          "cwe_ids": [
+            "CWE-78"
+          ]
+        }
+      ]
+    },
+    {
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "category": "subprocess_popen_with_shell_equals_true",
+      "filename": "examples/subprocess_shell.py",
+      "line_number": 42,
+      "description": "subprocess call with shell=True seems safe, but may be changed in the future, consider rewriting without shell",
+      "source": "bandit",
+      "rule_id": "B602",
+      "cwe_id": 78,
+      "is_on_changed_line": false,
+      "sources": [
+        "bandit"
+      ],
+      "rule_ids": [
+        "B602"
+      ],
+      "cwe_ids": [
+        "CWE-78"
+      ],
+      "evidence": [
+        {
+          "source": "bandit",
+          "rule_id": "B602",
+          "category": "subprocess_popen_with_shell_equals_true",
+          "severity": "LOW",
+          "confidence": "HIGH",
+          "description": "subprocess call with shell=True seems safe, but may be changed in the future, consider rewriting without shell",
+          "cwe_ids": [
+            "CWE-78"
+          ]
+        }
+      ]
+    },
+    {
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "category": "subprocess_popen_with_shell_equals_true",
+      "filename": "examples/subprocess_shell.py",
+      "line_number": 45,
+      "description": "subprocess call with shell=True identified, security issue.",
+      "source": "bandit",
+      "rule_id": "B602",
+      "cwe_id": 78,
+      "is_on_changed_line": false,
+      "sources": [
+        "bandit"
+      ],
+      "rule_ids": [
+        "B602"
+      ],
+      "cwe_ids": [
+        "CWE-78"
+      ],
+      "evidence": [
+        {
+          "source": "bandit",
+          "rule_id": "B602",
+          "category": "subprocess_popen_with_shell_equals_true",
+          "severity": "HIGH",
+          "confidence": "HIGH",
+          "description": "subprocess call with shell=True identified, security issue.",
+          "cwe_ids": [
+            "CWE-78"
+          ]
+        }
+      ]
+    },
+    {
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "category": "subprocess_popen_with_shell_equals_true",
+      "filename": "examples/subprocess_shell.py",
+      "line_number": 46,
+      "description": "subprocess call with shell=True identified, security issue.",
+      "source": "bandit",
+      "rule_id": "B602",
+      "cwe_id": 78,
+      "is_on_changed_line": false,
+      "sources": [
+        "bandit"
+      ],
+      "rule_ids": [
+        "B602"
+      ],
+      "cwe_ids": [
+        "CWE-78"
+      ],
+      "evidence": [
+        {
+          "source": "bandit",
+          "rule_id": "B602",
+          "category": "subprocess_popen_with_shell_equals_true",
+          "severity": "HIGH",
+          "confidence": "HIGH",
+          "description": "subprocess call with shell=True identified, security issue.",
+          "cwe_ids": [
+            "CWE-78"
+          ]
+        }
+      ]
+    },
+    {
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "category": "subprocess_popen_with_shell_equals_true",
+      "filename": "examples/subprocess_shell.py",
+      "line_number": 47,
+      "description": "subprocess call with shell=True identified, security issue.",
+      "source": "bandit",
+      "rule_id": "B602",
+      "cwe_id": 78,
+      "is_on_changed_line": false,
+      "sources": [
+        "bandit"
+      ],
+      "rule_ids": [
+        "B602"
+      ],
+      "cwe_ids": [
+        "CWE-78"
+      ],
+      "evidence": [
+        {
+          "source": "bandit",
+          "rule_id": "B602",
+          "category": "subprocess_popen_with_shell_equals_true",
+          "severity": "HIGH",
+          "confidence": "HIGH",
+          "description": "subprocess call with shell=True identified, security issue.",
+          "cwe_ids": [
+            "CWE-78"
+          ]
+        }
+      ]
+    },
+    {
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "category": "subprocess_popen_with_shell_equals_true",
+      "filename": "examples/subprocess_shell.py",
+      "line_number": 48,
+      "description": "subprocess call with shell=True identified, security issue.",
+      "source": "bandit",
+      "rule_id": "B602",
+      "cwe_id": 78,
+      "is_on_changed_line": false,
+      "sources": [
+        "bandit"
+      ],
+      "rule_ids": [
+        "B602"
+      ],
+      "cwe_ids": [
+        "CWE-78"
+      ],
+      "evidence": [
+        {
+          "source": "bandit",
+          "rule_id": "B602",
+          "category": "subprocess_popen_with_shell_equals_true",
+          "severity": "HIGH",
+          "confidence": "HIGH",
+          "description": "subprocess call with shell=True identified, security issue.",
+          "cwe_ids": [
+            "CWE-78"
+          ]
+        }
+      ]
+    },
+    {
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "category": "subprocess_popen_with_shell_equals_true",
+      "filename": "examples/subprocess_shell.py",
+      "line_number": 50,
+      "description": "subprocess call with shell=True identified, security issue.",
+      "source": "bandit",
+      "rule_id": "B602",
+      "cwe_id": 78,
+      "is_on_changed_line": false,
+      "sources": [
+        "bandit"
+      ],
+      "rule_ids": [
+        "B602"
+      ],
+      "cwe_ids": [
+        "CWE-78"
+      ],
+      "evidence": [
+        {
+          "source": "bandit",
+          "rule_id": "B602",
+          "category": "subprocess_popen_with_shell_equals_true",
+          "severity": "HIGH",
+          "confidence": "HIGH",
+          "description": "subprocess call with shell=True identified, security issue.",
+          "cwe_ids": [
+            "CWE-78"
+          ]
+        }
+      ]
+    },
+    {
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "category": "subprocess_popen_with_shell_equals_true",
+      "filename": "examples/subprocess_shell.py",
+      "line_number": 51,
+      "description": "subprocess call with shell=True identified, security issue.",
+      "source": "bandit",
+      "rule_id": "B602",
+      "cwe_id": 78,
+      "is_on_changed_line": false,
+      "sources": [
+        "bandit",
+        "semgrep"
+      ],
+      "rule_ids": [
+        "B602",
+        "python.lang.security.audit.subprocess-shell-true.subprocess-shell-true"
+      ],
+      "cwe_ids": [
+        "CWE-78"
+      ],
+      "evidence": [
+        {
+          "source": "bandit",
+          "rule_id": "B602",
+          "category": "subprocess_popen_with_shell_equals_true",
+          "severity": "HIGH",
+          "confidence": "HIGH",
+          "description": "subprocess call with shell=True identified, security issue.",
+          "cwe_ids": [
+            "CWE-78"
+          ]
+        },
+        {
+          "source": "semgrep",
+          "rule_id": "python.lang.security.audit.subprocess-shell-true.subprocess-shell-true",
+          "category": "['secure default']",
+          "severity": "ERROR",
+          "confidence": "MEDIUM",
+          "description": "Found 'subprocess' function 'call' with 'shell=True'. This is dangerous because this call will spawn the command using a shell process. Doing so propagates current shell settings and variables, which makes it much easier for a malicious actor to execute commands. Use 'shell=False' instead.",
+          "cwe_ids": [
+            "CWE-78"
+          ]
+        }
+      ]
+    },
+    {
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "category": "subprocess_popen_with_shell_equals_true",
+      "filename": "examples/subprocess_shell.py",
+      "line_number": 52,
+      "description": "subprocess call with shell=True identified, security issue.",
+      "source": "bandit",
+      "rule_id": "B602",
+      "cwe_id": 78,
+      "is_on_changed_line": false,
+      "sources": [
+        "bandit"
+      ],
+      "rule_ids": [
+        "B602"
+      ],
+      "cwe_ids": [
+        "CWE-78"
+      ],
+      "evidence": [
+        {
+          "source": "bandit",
+          "rule_id": "B602",
+          "category": "subprocess_popen_with_shell_equals_true",
+          "severity": "HIGH",
+          "confidence": "HIGH",
+          "description": "subprocess call with shell=True identified, security issue.",
+          "cwe_ids": [
+            "CWE-78"
+          ]
+        }
+      ]
+    },
+    {
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "category": "subprocess_popen_with_shell_equals_true",
+      "filename": "examples/subprocess_shell.py",
+      "line_number": 53,
+      "description": "subprocess call with shell=True identified, security issue.",
+      "source": "bandit",
+      "rule_id": "B602",
+      "cwe_id": 78,
+      "is_on_changed_line": false,
+      "sources": [
+        "bandit"
+      ],
+      "rule_ids": [
+        "B602"
+      ],
+      "cwe_ids": [
+        "CWE-78"
+      ],
+      "evidence": [
+        {
+          "source": "bandit",
+          "rule_id": "B602",
+          "category": "subprocess_popen_with_shell_equals_true",
+          "severity": "HIGH",
+          "confidence": "HIGH",
+          "description": "subprocess call with shell=True identified, security issue.",
+          "cwe_ids": [
+            "CWE-78"
+          ]
+        }
+      ]
+    },
+    {
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "category": "subprocess_without_shell_equals_true",
+      "filename": "examples/subprocess_shell.py",
+      "line_number": 55,
+      "description": "subprocess call - check for execution of untrusted input.",
+      "source": "bandit",
+      "rule_id": "B603",
+      "cwe_id": 78,
+      "is_on_changed_line": false,
+      "sources": [
+        "bandit"
+      ],
+      "rule_ids": [
+        "B603"
+      ],
+      "cwe_ids": [
+        "CWE-78"
+      ],
+      "evidence": [
+        {
+          "source": "bandit",
+          "rule_id": "B603",
+          "category": "subprocess_without_shell_equals_true",
+          "severity": "LOW",
+          "confidence": "HIGH",
+          "description": "subprocess call - check for execution of untrusted input.",
+          "cwe_ids": [
+            "CWE-78"
+          ]
+        }
+      ]
+    },
+    {
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "category": "subprocess_without_shell_equals_true",
+      "filename": "examples/subprocess_shell.py",
+      "line_number": 56,
+      "description": "subprocess call - check for execution of untrusted input.",
+      "source": "bandit",
+      "rule_id": "B603",
+      "cwe_id": 78,
+      "is_on_changed_line": false,
+      "sources": [
+        "bandit"
+      ],
+      "rule_ids": [
+        "B603"
+      ],
+      "cwe_ids": [
+        "CWE-78"
+      ],
+      "evidence": [
+        {
+          "source": "bandit",
+          "rule_id": "B603",
+          "category": "subprocess_without_shell_equals_true",
+          "severity": "LOW",
+          "confidence": "HIGH",
+          "description": "subprocess call - check for execution of untrusted input.",
+          "cwe_ids": [
+            "CWE-78"
+          ]
+        }
+      ]
+    },
+    {
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "category": "subprocess_without_shell_equals_true",
+      "filename": "examples/subprocess_shell.py",
+      "line_number": 57,
+      "description": "subprocess call - check for execution of untrusted input.",
+      "source": "bandit",
+      "rule_id": "B603",
+      "cwe_id": 78,
+      "is_on_changed_line": false,
+      "sources": [
+        "bandit"
+      ],
+      "rule_ids": [
+        "B603"
+      ],
+      "cwe_ids": [
+        "CWE-78"
+      ],
+      "evidence": [
+        {
+          "source": "bandit",
+          "rule_id": "B603",
+          "category": "subprocess_without_shell_equals_true",
+          "severity": "LOW",
+          "confidence": "HIGH",
+          "description": "subprocess call - check for execution of untrusted input.",
+          "cwe_ids": [
+            "CWE-78"
+          ]
+        }
+      ]
+    },
+    {
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "category": "subprocess_without_shell_equals_true",
+      "filename": "examples/subprocess_shell.py",
+      "line_number": 58,
+      "description": "subprocess call - check for execution of untrusted input.",
+      "source": "bandit",
+      "rule_id": "B603",
+      "cwe_id": 78,
+      "is_on_changed_line": false,
+      "sources": [
+        "bandit"
+      ],
+      "rule_ids": [
+        "B603"
+      ],
+      "cwe_ids": [
+        "CWE-78"
+      ],
+      "evidence": [
+        {
+          "source": "bandit",
+          "rule_id": "B603",
+          "category": "subprocess_without_shell_equals_true",
+          "severity": "LOW",
+          "confidence": "HIGH",
+          "description": "subprocess call - check for execution of untrusted input.",
+          "cwe_ids": [
+            "CWE-78"
+          ]
+        }
+      ]
+    },
+    {
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "category": "subprocess_without_shell_equals_true",
+      "filename": "examples/subprocess_shell.py",
+      "line_number": 59,
+      "description": "subprocess call - check for execution of untrusted input.",
+      "source": "bandit",
+      "rule_id": "B603",
+      "cwe_id": 78,
+      "is_on_changed_line": false,
+      "sources": [
+        "bandit"
+      ],
+      "rule_ids": [
+        "B603"
+      ],
+      "cwe_ids": [
+        "CWE-78"
+      ],
+      "evidence": [
+        {
+          "source": "bandit",
+          "rule_id": "B603",
+          "category": "subprocess_without_shell_equals_true",
+          "severity": "LOW",
+          "confidence": "HIGH",
+          "description": "subprocess call - check for execution of untrusted input.",
+          "cwe_ids": [
+            "CWE-78"
+          ]
+        }
+      ]
+    }
+  ],
+  "scanned_files": [
+    {
+      "filename": "bandit/plugins/injection_shell.py",
+      "changed_line_ranges": [
+        [
+          52,
+          53
+        ],
+        [
+          452,
+          453
+        ]
+      ]
+    },
+    {
+      "filename": "examples/subprocess_shell.py",
+      "changed_line_ranges": [
+        [
+          29,
+          31
+        ]
+      ]
+    },
+    {
+      "filename": "tests/functional/test_functional.py",
+      "changed_line_ranges": [
+        [
+          496,
+          497
+        ]
+      ]
+    }
+  ],
+  "skipped_files": [],
+  "warnings": [],
+  "raw_findings_count": 39,
+  "deduplicated_findings_count": 35,
+  "findings_on_changed_lines": 2,
+  "findings_by_scanner": {
+    "bandit": 35,
+    "semgrep": 4
+  },
+  "findings_by_severity": {
+    "LOW": 23,
+    "MEDIUM": 1,
+    "HIGH": 11
+  },
+  "scanner_errors": [],
+  "scanner_metadata": [
+    {
+      "scanner": "bandit",
+      "version": "1.9.4",
+      "config_identity": "application defaults; ignore-nosec",
+      "scanned_files": [
+        "bandit/plugins/injection_shell.py",
+        "examples/subprocess_shell.py",
+        "tests/functional/test_functional.py"
+      ],
+      "completed": true
+    },
+    {
+      "scanner": "semgrep",
+      "version": "1.176.0",
+      "config_identity": "p/security-audit",
+      "scanned_files": [
+        "bandit/plugins/injection_shell.py",
+        "examples/subprocess_shell.py",
+        "tests/functional/test_functional.py"
+      ],
+      "completed": true
+    }
+  ],
+  "analysis_complete": true
+}

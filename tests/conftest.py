@@ -22,3 +22,24 @@ def github():
         "additions": 1, "deletions": 1, "patch": "@@ -1 +1 @@\n-x = 1\n+eval(input())"}]
     client.file_content.return_value = b"eval(input())\n"
     return client
+
+
+@pytest.fixture
+def offline_semgrep(monkeypatch):
+    """Keep service/API tests offline; adapter tests exercise real output shapes."""
+    from app.scanners.base import ScannerResult
+    from app.scanners import semgrep
+    def scan(files, timeout):
+        valid = []
+        from app.scanners.base import ScannerError
+        errors = []
+        import ast
+        for name, content in files.items():
+            try:
+                ast.parse(content)
+                valid.append(name)
+            except SyntaxError:
+                errors.append(ScannerError(scanner="semgrep", kind="parse_error", filename=name,
+                                           message="Semgrep: syntax error"))
+        return ScannerResult(scanner="semgrep", scanned_files=valid, errors=errors)
+    monkeypatch.setattr(semgrep, "scan", scan)
