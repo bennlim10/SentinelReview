@@ -1,0 +1,11 @@
+rules:
+  - id: python.lang.security.audit.subprocess-shell-true.subprocess-shell-true
+    languages: [python]
+    message: Synthetic shell=True conformance rule
+    severity: ERROR
+    metadata:
+      cwe: ["CWE-78: OS Command Injection"]
+      category: security
+      confidence: HIGH
+    patterns:
+      - pattern: subprocess.$FUNC(..., shell=True, ...)

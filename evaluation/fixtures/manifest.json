@@ -1,0 +1,232 @@
+{
+  "dataset_name": "sentinelreview-synthetic",
+  "dataset_version": "1.0.0",
+  "cases": [
+    {
+      "source_dataset": "sentinelreview-synthetic-v1",
+      "source_reference": "evaluation/fixtures/README.md",
+      "source_revision": "1",
+      "language": "python",
+      "pair_id": null,
+      "notes": "Intentionally constructed harness fixture.",
+      "label_provenance": {
+        "kind": "constructed_fixture",
+        "reference": "evaluation/fixtures/README.md",
+        "rationale": "Authored to exercise one explicit evaluation outcome; not real-world ground truth.",
+        "reviewed_by": null
+      },
+      "license": {
+        "identifier": null,
+        "reference": "Project-local synthetic test fixture; no external dataset license."
+      },
+      "case_id": "synthetic-command-positive",
+      "filename": "command_injection.py",
+      "fixture_path": "code/command_injection.py",
+      "code": null,
+      "code_sha256": "5c67a68b8235ba3d442bf8521a58df60581cde83d1f9bddf1f6ba529647578dc",
+      "vulnerability_present": true,
+      "cwe_ids": [
+        "CWE-78"
+      ],
+      "expected_category": null,
+      "vulnerable_line_range": {
+        "start": 3,
+        "end": 3
+      },
+      "assessment_line_range": {
+        "start": 3,
+        "end": 3
+      },
+      "changed_line_ranges": [
+        {
+          "start": 3,
+          "end": 3
+        }
+      ]
+    },
+    {
+      "source_dataset": "sentinelreview-synthetic-v1",
+      "source_reference": "evaluation/fixtures/README.md",
+      "source_revision": "1",
+      "language": "python",
+      "pair_id": null,
+      "notes": "Intentionally constructed harness fixture.",
+      "label_provenance": {
+        "kind": "constructed_fixture",
+        "reference": "evaluation/fixtures/README.md",
+        "rationale": "Authored to exercise one explicit evaluation outcome; not real-world ground truth.",
+        "reviewed_by": null
+      },
+      "license": {
+        "identifier": null,
+        "reference": "Project-local synthetic test fixture; no external dataset license."
+      },
+      "case_id": "synthetic-subprocess-negative",
+      "filename": "safe_subprocess.py",
+      "fixture_path": "code/safe_subprocess.py",
+      "code": null,
+      "code_sha256": "098a7731edc679c8220faa2979bc12191e56be6cfc9218adef5c39d657415f42",
+      "vulnerability_present": false,
+      "cwe_ids": [
+        "CWE-78"
+      ],
+      "expected_category": null,
+      "vulnerable_line_range": null,
+      "assessment_line_range": {
+        "start": 2,
+        "end": 2
+      },
+      "changed_line_ranges": [
+        {
+          "start": 1,
+          "end": 1
+        }
+      ]
+    },
+    {
+      "source_dataset": "sentinelreview-synthetic-v1",
+      "source_reference": "evaluation/fixtures/README.md",
+      "source_revision": "1",
+      "language": "python",
+      "pair_id": null,
+      "notes": "Intentionally constructed harness fixture.",
+      "label_provenance": {
+        "kind": "constructed_fixture",
+        "reference": "evaluation/fixtures/README.md",
+        "rationale": "Authored to exercise one explicit evaluation outcome; not real-world ground truth.",
+        "reviewed_by": null
+      },
+      "license": {
+        "identifier": null,
+        "reference": "Project-local synthetic test fixture; no external dataset license."
+      },
+      "case_id": "synthetic-hash-positive",
+      "filename": "weak_hash.py",
+      "fixture_path": "code/weak_hash.py",
+      "code": null,
+      "code_sha256": "446c81ac44a0626754884d415bf367adef0802b19d16f530dd45f94d68a7d048",
+      "vulnerability_present": true,
+      "cwe_ids": [
+        "CWE-327"
+      ],
+      "expected_category": null,
+      "vulnerable_line_range": {
+        "start": 2,
+        "end": 2
+      },
+      "assessment_line_range": {
+        "start": 2,
+        "end": 2
+      },
+      "changed_line_ranges": [
+        {
+          "start": 1,
+          "end": 1
+        }
+      ]
+    },
+    {
+      "source_dataset": "sentinelreview-synthetic-v1",
+      "source_reference": "evaluation/fixtures/README.md",
+      "source_revision": "1",
+      "language": "python",
+      "pair_id": null,
+      "notes": "Intentionally constructed harness fixture.",
+      "label_provenance": {
+        "kind": "constructed_fixture",
+        "reference": "evaluation/fixtures/README.md",
+        "rationale": "Authored to exercise one explicit evaluation outcome; not real-world ground truth.",
+        "reviewed_by": null
+      },
+      "license": {
+        "identifier": null,
+        "reference": "Project-local synthetic test fixture; no external dataset license."
+      },
+      "case_id": "synthetic-path-positive",
+      "filename": "path_target.py",
+      "fixture_path": "code/path_target.py",
+      "code": null,
+      "code_sha256": "3d458e00524a3f5f869c87605a550f902bb26af8ea052bc415505da03de4cf15",
+      "vulnerability_present": true,
+      "cwe_ids": [
+        "CWE-22"
+      ],
+      "expected_category": null,
+      "vulnerable_line_range": {
+        "start": 2,
+        "end": 2
+      },
+      "assessment_line_range": {
+        "start": 2,
+        "end": 2
+      },
+      "changed_line_ranges": null
+    },
+    {
+      "source_dataset": "sentinelreview-synthetic-v1",
+      "source_reference": "evaluation/fixtures/README.md",
+      "source_revision": "1",
+      "language": "python",
+      "pair_id": null,
+      "notes": "Intentionally constructed harness fixture.",
+      "label_provenance": {
+        "kind": "constructed_fixture",
+        "reference": "evaluation/fixtures/README.md",
+        "rationale": "Authored to exercise one explicit evaluation outcome; not real-world ground truth.",
+        "reviewed_by": null
+      },
+      "license": {
+        "identifier": null,
+        "reference": "Project-local synthetic test fixture; no external dataset license."
+      },
+      "case_id": "synthetic-clean-negative",
+      "filename": "clean_control.py",
+      "fixture_path": "code/clean_control.py",
+      "code": null,
+      "code_sha256": "6a219cf5da23d4847254130f758d1ad34230d443072f583dd0dcf086398bdc09",
+      "vulnerability_present": false,
+      "cwe_ids": [
+        "CWE-78"
+      ],
+      "expected_category": null,
+      "vulnerable_line_range": null,
+      "assessment_line_range": {
+        "start": 1,
+        "end": 2
+      },
+      "changed_line_ranges": []
+    },
+    {
+      "source_dataset": "sentinelreview-synthetic-v1",
+      "source_reference": "evaluation/fixtures/README.md",
+      "source_revision": "1",
+      "language": "python",
+      "pair_id": null,
+      "notes": "Intentionally constructed harness fixture.",
+      "label_provenance": {
+        "kind": "constructed_fixture",
+        "reference": "evaluation/fixtures/README.md",
+        "rationale": "Authored to exercise one explicit evaluation outcome; not real-world ground truth.",
+        "reviewed_by": null
+      },
+      "license": {
+        "identifier": null,
+        "reference": "Project-local synthetic test fixture; no external dataset license."
+      },
+      "case_id": "synthetic-unscorable",
+      "filename": "unmapped_target.py",
+      "fixture_path": "code/unmapped_target.py",
+      "code": null,
+      "code_sha256": "d3fefa9c9866927aadc9d00ceb8b4923fa47baf60c7ad96b6e4159ebaec6f773",
+      "vulnerability_present": false,
+      "cwe_ids": [],
+      "expected_category": "synthetic-unmapped",
+      "vulnerable_line_range": null,
+      "assessment_line_range": {
+        "start": 1,
+        "end": 1
+      },
+      "changed_line_ranges": null
+    }
+  ]
+}

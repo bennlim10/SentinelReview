@@ -424,3 +424,20 @@ been created. Real provider authentication, model access, acceptance of the
 structured-output schema, model judgments, latency and token usage remain
 unvalidated. No accuracy, false-positive reduction, or prioritization improvement
 is claimed. Those require a labeled evaluation phase.
+
+## Evaluation harness (v0.4)
+
+The standalone `evaluation` package evaluates Bandit, Semgrep, and their combined
+output against strictly scoped manifests without starting FastAPI or invoking AI.
+It supports conservative line/CWE matching, explicit reviewed rule mappings,
+case-target confusion metrics with null zero-denominator values, changed-line
+comparisons, scanner agreement/errors, deduplication counts, reproducibility hashes,
+and JSON/Markdown reports.
+
+Only six intentionally constructed synthetic harness fixtures are included. They
+must not be presented as real benchmark performance. No public benchmark cases or
+Semgrep registry snapshot have been imported. See
+[`evaluation/README.md`](evaluation/README.md) for the required distinction among
+unit tests, synthetic harness validation, scanner-conformance checks, real-world
+benchmarking, and optional recorded-AI evaluation. Generated collections under
+`evaluation/results/` are ignored by Git.

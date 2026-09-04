@@ -38,12 +38,12 @@ def normalize(item: dict, filename: str) -> Finding:
             description=extra["message"], cwe_ids=ids)])
 
 
-def scan(files: dict[str, bytes], timeout: float) -> ScannerResult:
+def scan(files: dict[str, bytes], timeout: float, config_identity: str = CONFIG) -> ScannerResult:
     try:
         tool_version = version("semgrep")
     except PackageNotFoundError:
         tool_version = None
-    result = ScannerResult(scanner="semgrep", version=tool_version, config_identity=CONFIG)
+    result = ScannerResult(scanner="semgrep", version=tool_version, config_identity=config_identity)
     if not files:
         return result
     with TemporaryDirectory(prefix="sentinelreview-semgrep-") as directory:
@@ -57,11 +57,19 @@ def scan(files: dict[str, bytes], timeout: float) -> ScannerResult:
             mapping[str(path)] = filename
         env = {key: value for key, value in os.environ.items()
                if not key.startswith("SEMGREP_") and key not in {"GITHUB_TOKEN", "GH_TOKEN"}}
+        # A local evaluation rules file needs no network. Ignore inherited proxy
+        # settings in that mode so Semgrep cannot route local-only scans through
+        # a proxy (and remains usable in isolated environments with no CA bundle).
+        if not config_identity.startswith("p/"):
+            from certifi import where as certifi_ca_bundle
+            env = {key: value for key, value in env.items()
+                   if key.upper() not in {"HTTP_PROXY", "HTTPS_PROXY", "ALL_PROXY", "NO_PROXY"}}
+            env["SSL_CERT_FILE"] = certifi_ca_bundle()
         env.update(SEMGREP_SETTINGS_FILE=str(root / "settings.yml"),
                    SEMGREP_LOG_FILE=str(root / "semgrep.log"), SEMGREP_SEND_METRICS="off")
         try:
             process = subprocess.run([str(Path(sys.executable).with_name("semgrep.exe" if os.name == "nt" else "semgrep")),
-                "scan", "--config", CONFIG,
+                "scan", "--config", config_identity,
                 "--json", "--metrics=off", "--disable-version-check", "--disable-nosem",
                 "--no-git-ignore", "--oss-only", "--jobs", "1", "--max-target-bytes", "0",
                 "--timeout", str(max(1, int(timeout))), str(targets)],

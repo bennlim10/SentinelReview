@@ -69,3 +69,20 @@ def test_execution(monkeypatch, mode):
 def test_empty():
     result = semgrep.scan({}, 2)
     assert result.completed and not result.errors and not result.findings
+
+
+def test_local_config_does_not_inherit_proxy(monkeypatch, tmp_path):
+    rules = tmp_path / "rules.yml"
+    rules.write_text("rules: []\n")
+    monkeypatch.setenv("HTTPS_PROXY", "https://proxy.example")
+    def run(command, **kwargs):
+        assert "HTTPS_PROXY" not in kwargs["env"]
+        assert Path(kwargs["env"]["SSL_CERT_FILE"]).is_file()
+        root = Path(kwargs["cwd"])
+        path = str(root / "targets/file_0.py")
+        report = {"version": "test", "results": [], "errors": [],
+                  "paths": {"scanned": [path]}}
+        return subprocess.CompletedProcess(command, 0, stdout=json.dumps(report).encode())
+    monkeypatch.setattr(subprocess, "run", run)
+    result = semgrep.scan({"file.py": b"pass"}, 2, str(rules))
+    assert result.completed and result.scanned_files == ["file.py"]

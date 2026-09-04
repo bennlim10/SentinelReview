@@ -34,3 +34,6 @@ coverage.xml
 
 # Optional local AI evaluation output
 evaluations/
+
+# Generated evaluation-harness reports
+evaluation/results/
