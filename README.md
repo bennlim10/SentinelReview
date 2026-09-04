@@ -2,6 +2,8 @@
 
 **AI-assisted security analysis for GitHub pull requests.**
 
+**[Live Demo](https://sentinel-review-rouge.vercel.app)**
+
 SentinelReview combines deterministic static analysis, cross-scanner normalization,
 contextual AI reasoning, and reproducible security evaluation to help identify and
 prioritize security issues in code changes. The current development version is
@@ -24,9 +26,9 @@ Python files, conservatively merges equivalent findings, and returns structured
 JSON. The local Next.js interface presents the same real backend response. No
 proprietary or company code is used.
 
-The repository includes a local Next.js analysis interface. There is no database,
-authentication, background worker, webhook, repository cloning, or deployment
-infrastructure.
+The repository includes the deployed Next.js analysis interface and Docker-based
+backend configuration. There is no database, authentication, background worker,
+webhook, or repository cloning.
 
 AI reviews do not replace scanners or change deterministic severity. Live OpenAI
 validation is **pending** because API credentials are not configured; AI tests use
@@ -93,6 +95,32 @@ curl -X POST http://127.0.0.1:8000/api/v1/analyze \
 
 The request still accepts `owner/repo` and a positive integer PR number. The caller
 waits for the response; nothing is persisted by the service.
+
+## Deployment
+
+The public application uses a Vercel-hosted Next.js frontend and a Docker-based
+FastAPI service on Render:
+
+```text
+Browser → https://sentinel-review-rouge.vercel.app
+        → https://sentinelreview-api.onrender.com
+        → GitHub REST API + Bandit + Semgrep
+```
+
+The production frontend sets
+`NEXT_PUBLIC_SENTINELREVIEW_API_URL=https://sentinelreview-api.onrender.com`.
+The backend sets `SENTINELREVIEW_CORS_ORIGINS` to the exact Vercel origin and
+`AI_ENABLED=false`. `GITHUB_TOKEN` remains optional for public repositories and is
+not configured in the public deployment. Render reads its assigned `PORT`; the
+container binds Uvicorn to `0.0.0.0`. The health check is `GET /health`.
+
+The Render free instance can spin down after inactivity, so its first request may
+take 50 seconds or more. Local setup remains independent and continues to use the
+localhost defaults in `.env.example` and `frontend/.env.example`. Deployment
+credentials and provider-managed environment values must remain outside Git.
+
+AI reasoning is optional and disabled in this public deployment. No AI provider
+key, model, or endpoint is configured.
 
 ## Architecture
 
@@ -265,6 +293,7 @@ Dependencies are version-bounded rather than fully locked.
 | `MAX_PYTHON_FILES` | 50 | Maximum downloaded Python files per request |
 | `MAX_FILE_BYTES` | 500000 | Per-file content limit |
 | `MAX_TOTAL_BYTES` | 5000000 | Retained content limit per request |
+| `SENTINELREVIEW_CORS_ORIGINS` | local frontend origins | Comma-separated browser origin allowlist |
 
 GitHub exposes at most 3,000 changed files; mismatches with PR metadata are reported
 as incomplete. Downloads are bounded while streaming; metadata has a 20 MB
