@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     max_python_files: int = Field(default=50, gt=0, le=3000)
     max_file_bytes: int = Field(default=500_000, gt=0)
     max_total_bytes: int = Field(default=5_000_000, gt=0)
+    sentinelreview_cors_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
 
     ai_enabled: bool = False
     ai_provider: str | None = None
@@ -26,3 +27,15 @@ class Settings(BaseSettings):
     ai_max_output_tokens: int = Field(default=1200, ge=100, le=10000)
     ai_max_response_bytes: int = Field(default=65536, ge=1024, le=1000000)
     ai_evaluation_output: str | None = None
+
+    @property
+    def cors_origins(self) -> list[str]:
+        """Return the configured, normalized CORS origin allowlist."""
+        origins = []
+        for value in self.sentinelreview_cors_origins.split(","):
+            origin = value.strip().rstrip("/")
+            if origin == "*":
+                raise ValueError("Wildcard CORS origins are not supported.")
+            if origin and origin not in origins:
+                origins.append(origin)
+        return origins

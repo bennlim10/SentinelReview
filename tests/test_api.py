@@ -5,7 +5,7 @@ pytestmark = pytest.mark.usefixtures("offline_semgrep")
 
 from app.api.routes import get_github, get_settings
 from app.integrations.github import GitHubError
-from app.main import app
+from app.main import app, create_app
 
 
 @pytest.fixture
@@ -51,3 +51,38 @@ def test_untrusted_origin_is_not_allowed(client):
         "Access-Control-Request-Method": "POST",
     })
     assert "access-control-allow-origin" not in response.headers
+
+
+def test_configured_production_origin_is_allowed(settings):
+    settings.sentinelreview_cors_origins = "https://sentinelreview.example"
+    with TestClient(create_app(settings)) as production_client:
+        response = production_client.options("/api/v1/analyze", headers={
+            "Origin": "https://sentinelreview.example",
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "content-type",
+        })
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == "https://sentinelreview.example"
+
+
+def test_configured_production_origin_rejects_foreign_origin(settings):
+    settings.sentinelreview_cors_origins = "https://sentinelreview.example"
+    with TestClient(create_app(settings)) as production_client:
+        response = production_client.options("/api/v1/analyze", headers={
+            "Origin": "https://foreign.example",
+            "Access-Control-Request-Method": "POST",
+        })
+    assert "access-control-allow-origin" not in response.headers
+
+
+def test_health_endpoint_does_not_use_analysis_dependencies():
+    with TestClient(create_app()) as health_client:
+        response = health_client.get("/health")
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
+
+
+def test_wildcard_cors_origin_is_rejected(settings):
+    settings.sentinelreview_cors_origins = "*"
+    with pytest.raises(ValueError, match="Wildcard CORS"):
+        create_app(settings)
