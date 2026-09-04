@@ -1,0 +1,334 @@
+{
+  "dataset_name": "sentinelreview-real-world-python-pilot-v1",
+  "dataset_version": "sentinelreview-real-world-python-pilot-v1",
+  "display_name": "REAL-WORLD PILOT — 3 VULNERABILITY PAIRS / 6 CASES",
+  "cases": [
+    {
+      "source_dataset": "sentinelreview-real-world-python-pilot-v1",
+      "language": "python",
+      "code": null,
+      "fixture_path": null,
+      "changed_line_ranges": null,
+      "expected_category": null,
+      "notes": "Single-reviewer pilot case; independent adjudication is pending.",
+      "benchmark_group": "real_world",
+      "known_scanner_test_overlap": false,
+      "case_id": "aiohttp-cve-2024-23334-vulnerable",
+      "source_reference": "https://github.com/advisories/GHSA-5h86-8mv2-jq9f",
+      "source_revision": "33ccdfb0a12690af5bb49bda2319ec0907fa7827",
+      "filename": "aiohttp/web_urldispatcher.py",
+      "vulnerability_present": true,
+      "cwe_ids": [
+        "CWE-22"
+      ],
+      "vulnerable_line_range": {
+        "start": 643,
+        "end": 645
+      },
+      "assessment_line_range": {
+        "start": 634,
+        "end": 648
+      },
+      "code_sha256": "aaa86823d42cc61c66b6ebf56ea81b2a1a3224c7dba6db2a7b230596a59e29c4",
+      "pair_id": "aiohttp-cve-2024-23334",
+      "pair_role": "vulnerable",
+      "repository": "https://github.com/aio-libs/aiohttp",
+      "fixing_commit": "1c335944d6a8b1298baf179b7c0b3069f10c514b",
+      "cve_id": "CVE-2024-23334",
+      "ghsa_id": "GHSA-5h86-8mv2-jq9f",
+      "advisory_references": [
+        "https://github.com/advisories/GHSA-5h86-8mv2-jq9f",
+        "https://github.com/aio-libs/aiohttp/commit/1c335944d6a8b1298baf179b7c0b3069f10c514b"
+      ],
+      "duplicate_cluster_id": "CVE-2024-23334-static-route-path-validation",
+      "code_fingerprint": "daaef964a4bf16308b4540d442c253c8b650eb8ee98749aaaede7f2b56cf9def",
+      "normalized_fingerprint": "d6a86b06df5631f173f7f7960244ea049a5511bac09d5c8c3718ea6578506f35",
+      "selection_reason": "Reviewed advisory identifies this request-time static path resolution as vulnerable when follow_symlinks is enabled.",
+      "label_provenance": {
+        "kind": "reviewed_advisory_manual_localization",
+        "reference": "https://github.com/advisories/GHSA-5h86-8mv2-jq9f",
+        "rationale": "The advisory identifies path traversal with follow_symlinks enabled. The fixing commit's sole parent is this revision and replaces lines 643-645 with normalization and containment checks.",
+        "reviewed_by": "OpenAI Codex (source-assisted curation)",
+        "reviewer_status": "single_reviewer",
+        "reviewed_at": "2026-09-04T20:35:36Z"
+      },
+      "license": {
+        "identifier": "Apache-2.0",
+        "reference": "https://github.com/aio-libs/aiohttp/blob/33ccdfb0a12690af5bb49bda2319ec0907fa7827/LICENSE.txt",
+        "source_retrieval_mode": "immutable_reference_fetch",
+        "redistribution": "Reference-and-fetch; redistribution requires Apache-2.0 license and notice compliance."
+      }
+    },
+    {
+      "source_dataset": "sentinelreview-real-world-python-pilot-v1",
+      "language": "python",
+      "code": null,
+      "fixture_path": null,
+      "changed_line_ranges": null,
+      "expected_category": null,
+      "notes": "Single-reviewer pilot case; independent adjudication is pending.",
+      "benchmark_group": "real_world",
+      "known_scanner_test_overlap": false,
+      "case_id": "aiohttp-cve-2024-23334-fixed",
+      "source_reference": "https://github.com/aio-libs/aiohttp/commit/1c335944d6a8b1298baf179b7c0b3069f10c514b",
+      "source_revision": "1c335944d6a8b1298baf179b7c0b3069f10c514b",
+      "filename": "aiohttp/web_urldispatcher.py",
+      "vulnerability_present": false,
+      "cwe_ids": [
+        "CWE-22"
+      ],
+      "vulnerable_line_range": null,
+      "assessment_line_range": {
+        "start": 639,
+        "end": 658
+      },
+      "code_sha256": "9a5a8c41100704344814efa1c97e351b93f62d17fae54c02c62aaa4c40dfc439",
+      "pair_id": "aiohttp-cve-2024-23334",
+      "pair_role": "fixed",
+      "repository": "https://github.com/aio-libs/aiohttp",
+      "fixing_commit": "1c335944d6a8b1298baf179b7c0b3069f10c514b",
+      "cve_id": "CVE-2024-23334",
+      "ghsa_id": "GHSA-5h86-8mv2-jq9f",
+      "advisory_references": [
+        "https://github.com/advisories/GHSA-5h86-8mv2-jq9f",
+        "https://github.com/aio-libs/aiohttp/commit/1c335944d6a8b1298baf179b7c0b3069f10c514b"
+      ],
+      "duplicate_cluster_id": "CVE-2024-23334-static-route-path-validation",
+      "code_fingerprint": "966d3b436a3533179dc906c1d93f68291f4072fa720c6c24509c5dd024dd239e",
+      "normalized_fingerprint": "818f7c2fcae0154e753d52e3d40a218bdff42e90ef78bada720299b9d7dee4aa",
+      "selection_reason": "The corresponding remediated request-time operation provides a paired negative control.",
+      "label_provenance": {
+        "kind": "reviewed_advisory_manual_localization",
+        "reference": "https://github.com/aio-libs/aiohttp/commit/1c335944d6a8b1298baf179b7c0b3069f10c514b",
+        "rationale": "This fixing revision normalizes the unresolved path and checks containment before resolution in the same _handle operation.",
+        "reviewed_by": "OpenAI Codex (source-assisted curation)",
+        "reviewer_status": "single_reviewer",
+        "reviewed_at": "2026-09-04T20:35:36Z"
+      },
+      "license": {
+        "identifier": "Apache-2.0",
+        "reference": "https://github.com/aio-libs/aiohttp/blob/1c335944d6a8b1298baf179b7c0b3069f10c514b/LICENSE.txt",
+        "source_retrieval_mode": "immutable_reference_fetch",
+        "redistribution": "Reference-and-fetch; redistribution requires Apache-2.0 license and notice compliance."
+      }
+    },
+    {
+      "source_dataset": "sentinelreview-real-world-python-pilot-v1",
+      "language": "python",
+      "code": null,
+      "fixture_path": null,
+      "changed_line_ranges": null,
+      "expected_category": null,
+      "notes": "Single-reviewer pilot case; independent adjudication is pending.",
+      "benchmark_group": "real_world",
+      "known_scanner_test_overlap": false,
+      "case_id": "aiohttp-cve-2024-42367-vulnerable",
+      "source_reference": "https://github.com/advisories/GHSA-jwhx-xcg6-8xhj",
+      "source_revision": "6a778061eb3d66146012ceef760c8d84b7be6cf3",
+      "filename": "aiohttp/web_fileresponse.py",
+      "vulnerability_present": true,
+      "cwe_ids": [
+        "CWE-61"
+      ],
+      "vulnerable_line_range": {
+        "start": 178,
+        "end": 180
+      },
+      "assessment_line_range": {
+        "start": 173,
+        "end": 183
+      },
+      "code_sha256": "63e114faa6a35d3895a38872ba7cc012bffd218f542a2bcc999b7246fd9569a8",
+      "pair_id": "aiohttp-cve-2024-42367",
+      "pair_role": "vulnerable",
+      "repository": "https://github.com/aio-libs/aiohttp",
+      "fixing_commit": "ce2e9758814527589b10759a20783fb03b98339f",
+      "cve_id": "CVE-2024-42367",
+      "ghsa_id": "GHSA-jwhx-xcg6-8xhj",
+      "advisory_references": [
+        "https://github.com/advisories/GHSA-jwhx-xcg6-8xhj",
+        "https://github.com/aio-libs/aiohttp/commit/ce2e9758814527589b10759a20783fb03b98339f"
+      ],
+      "duplicate_cluster_id": "CVE-2024-42367-compressed-symlink-follow",
+      "code_fingerprint": "c8f56c4440809c70e741a4d6863d484164a1b345ea158e5874cf262a29297273",
+      "normalized_fingerprint": "de1c1d92036ec127485cd574b522f93177e179f030c152915226c830def42c7c",
+      "selection_reason": "Reviewed advisory directly identifies compressed_path.stat() in this method as following attacker-controlled symlinks.",
+      "label_provenance": {
+        "kind": "reviewed_advisory_manual_localization",
+        "reference": "https://github.com/advisories/GHSA-jwhx-xcg6-8xhj",
+        "rationale": "The advisory links this file and operation. The fixing commit's sole parent is this revision and changes stat() to lstat() plus a regular-file check.",
+        "reviewed_by": "OpenAI Codex (source-assisted curation)",
+        "reviewer_status": "single_reviewer",
+        "reviewed_at": "2026-09-04T20:35:36Z"
+      },
+      "license": {
+        "identifier": "Apache-2.0",
+        "reference": "https://github.com/aio-libs/aiohttp/blob/6a778061eb3d66146012ceef760c8d84b7be6cf3/LICENSE.txt",
+        "source_retrieval_mode": "immutable_reference_fetch",
+        "redistribution": "Reference-and-fetch; redistribution requires Apache-2.0 license and notice compliance."
+      }
+    },
+    {
+      "source_dataset": "sentinelreview-real-world-python-pilot-v1",
+      "language": "python",
+      "code": null,
+      "fixture_path": null,
+      "changed_line_ranges": null,
+      "expected_category": null,
+      "notes": "Single-reviewer pilot case; independent adjudication is pending.",
+      "benchmark_group": "real_world",
+      "known_scanner_test_overlap": false,
+      "case_id": "aiohttp-cve-2024-42367-fixed",
+      "source_reference": "https://github.com/aio-libs/aiohttp/commit/ce2e9758814527589b10759a20783fb03b98339f",
+      "source_revision": "ce2e9758814527589b10759a20783fb03b98339f",
+      "filename": "aiohttp/web_fileresponse.py",
+      "vulnerability_present": false,
+      "cwe_ids": [
+        "CWE-61"
+      ],
+      "vulnerable_line_range": null,
+      "assessment_line_range": {
+        "start": 173,
+        "end": 186
+      },
+      "code_sha256": "f972de34d95eeab3a8528e35dd9f412e3a388be333f7bd950be791cee2b18147",
+      "pair_id": "aiohttp-cve-2024-42367",
+      "pair_role": "fixed",
+      "repository": "https://github.com/aio-libs/aiohttp",
+      "fixing_commit": "ce2e9758814527589b10759a20783fb03b98339f",
+      "cve_id": "CVE-2024-42367",
+      "ghsa_id": "GHSA-jwhx-xcg6-8xhj",
+      "advisory_references": [
+        "https://github.com/advisories/GHSA-jwhx-xcg6-8xhj",
+        "https://github.com/aio-libs/aiohttp/commit/ce2e9758814527589b10759a20783fb03b98339f"
+      ],
+      "duplicate_cluster_id": "CVE-2024-42367-compressed-symlink-follow",
+      "code_fingerprint": "a2e61e254b452393579a3a711e57b9a46f4fc14eb142827382fd76e955275efe",
+      "normalized_fingerprint": "9f95d88ed0a5289cf6744475488663425a5d884a0be90cf4ebe16786ca559fb3",
+      "selection_reason": "The corresponding lstat and regular-file validation is the remediated paired control.",
+      "label_provenance": {
+        "kind": "reviewed_advisory_manual_localization",
+        "reference": "https://github.com/aio-libs/aiohttp/commit/ce2e9758814527589b10759a20783fb03b98339f",
+        "rationale": "The selected fixed operation no longer follows compressed symlinks and only returns regular files.",
+        "reviewed_by": "OpenAI Codex (source-assisted curation)",
+        "reviewer_status": "single_reviewer",
+        "reviewed_at": "2026-09-04T20:35:36Z"
+      },
+      "license": {
+        "identifier": "Apache-2.0",
+        "reference": "https://github.com/aio-libs/aiohttp/blob/ce2e9758814527589b10759a20783fb03b98339f/LICENSE.txt",
+        "source_retrieval_mode": "immutable_reference_fetch",
+        "redistribution": "Reference-and-fetch; redistribution requires Apache-2.0 license and notice compliance."
+      }
+    },
+    {
+      "source_dataset": "sentinelreview-real-world-python-pilot-v1",
+      "language": "python",
+      "code": null,
+      "fixture_path": null,
+      "changed_line_ranges": null,
+      "expected_category": null,
+      "notes": "Single-reviewer pilot case; independent adjudication is pending.",
+      "benchmark_group": "real_world",
+      "known_scanner_test_overlap": false,
+      "case_id": "poetry-cve-2022-36069-vulnerable",
+      "source_reference": "https://github.com/advisories/GHSA-9xgj-fcgf-x6mw",
+      "source_revision": "37deae62c6dc64fcaaea26e61e3fe98ae041eebe",
+      "filename": "poetry/core/vcs/git.py",
+      "vulnerability_present": true,
+      "cwe_ids": [
+        "CWE-88"
+      ],
+      "vulnerable_line_range": {
+        "start": 245,
+        "end": 246
+      },
+      "assessment_line_range": {
+        "start": 245,
+        "end": 246
+      },
+      "code_sha256": "cf962311cbe7e7a315cc05640e7463d51c501fee05dabdfe152440bdc4e6fcbb",
+      "pair_id": "poetry-cve-2022-36069",
+      "pair_role": "vulnerable",
+      "repository": "https://github.com/python-poetry/poetry-core",
+      "fixing_commit": "cc84be60ac9af549664051c2684621db51d05ff1",
+      "cve_id": "CVE-2022-36069",
+      "ghsa_id": "GHSA-9xgj-fcgf-x6mw",
+      "advisory_references": [
+        "https://github.com/advisories/GHSA-9xgj-fcgf-x6mw",
+        "https://github.com/python-poetry/poetry-core/commit/cc84be60ac9af549664051c2684621db51d05ff1"
+      ],
+      "duplicate_cluster_id": "CVE-2022-36069-git-option-injection",
+      "code_fingerprint": "f25039b4a2deaf1101496114afdb8925992c8eaf738484d4b13a8617c1115b1d",
+      "normalized_fingerprint": "2fa9e417d9dc7fcac392efdacec224c375b02662380de6d04d728d2aedc4e79f",
+      "selection_reason": "Reviewed advisory quotes this clone operation and explains leading-dash Git argument injection.",
+      "label_provenance": {
+        "kind": "reviewed_advisory_manual_localization",
+        "reference": "https://github.com/advisories/GHSA-9xgj-fcgf-x6mw",
+        "rationale": "The advisory identifies unsanitized repository input in clone. The fixing commit's sole parent is this revision and adds validation plus an end-of-options delimiter.",
+        "reviewed_by": "OpenAI Codex (source-assisted curation)",
+        "reviewer_status": "single_reviewer",
+        "reviewed_at": "2026-09-04T20:35:36Z"
+      },
+      "license": {
+        "identifier": "MIT",
+        "reference": "https://github.com/python-poetry/poetry-core/blob/37deae62c6dc64fcaaea26e61e3fe98ae041eebe/LICENSE",
+        "source_retrieval_mode": "immutable_reference_fetch",
+        "redistribution": "Reference-and-fetch; redistribution requires retaining the MIT copyright and permission notice."
+      }
+    },
+    {
+      "source_dataset": "sentinelreview-real-world-python-pilot-v1",
+      "language": "python",
+      "code": null,
+      "fixture_path": null,
+      "changed_line_ranges": null,
+      "expected_category": null,
+      "notes": "Single-reviewer pilot case; independent adjudication is pending.",
+      "benchmark_group": "real_world",
+      "known_scanner_test_overlap": false,
+      "case_id": "poetry-cve-2022-36069-fixed",
+      "source_reference": "https://github.com/python-poetry/poetry-core/commit/cc84be60ac9af549664051c2684621db51d05ff1",
+      "source_revision": "cc84be60ac9af549664051c2684621db51d05ff1",
+      "filename": "poetry/core/vcs/git.py",
+      "vulnerability_present": false,
+      "cwe_ids": [
+        "CWE-88"
+      ],
+      "vulnerable_line_range": null,
+      "assessment_line_range": {
+        "start": 250,
+        "end": 253
+      },
+      "code_sha256": "2e55abf7455412ef1c8b9ab90315da35b58686eaacfe51b9d510ecaa4b32c695",
+      "pair_id": "poetry-cve-2022-36069",
+      "pair_role": "fixed",
+      "repository": "https://github.com/python-poetry/poetry-core",
+      "fixing_commit": "cc84be60ac9af549664051c2684621db51d05ff1",
+      "cve_id": "CVE-2022-36069",
+      "ghsa_id": "GHSA-9xgj-fcgf-x6mw",
+      "advisory_references": [
+        "https://github.com/advisories/GHSA-9xgj-fcgf-x6mw",
+        "https://github.com/python-poetry/poetry-core/commit/cc84be60ac9af549664051c2684621db51d05ff1"
+      ],
+      "duplicate_cluster_id": "CVE-2022-36069-git-option-injection",
+      "code_fingerprint": "8688575492e8f58f8c16ca49d44436e9a5f0951d05b17eb7313cf03dbe7a370f",
+      "normalized_fingerprint": "613f34da083bd5a4f200304fe6ddf3231fb106eb321533fe851083a801c14f80",
+      "selection_reason": "The same clone operation after parameter validation and delimiter insertion is the paired negative control.",
+      "label_provenance": {
+        "kind": "reviewed_advisory_manual_localization",
+        "reference": "https://github.com/python-poetry/poetry-core/commit/cc84be60ac9af549664051c2684621db51d05ff1",
+        "rationale": "The selected fixed operation rejects leading-dash repository values and separates options from positional arguments.",
+        "reviewed_by": "OpenAI Codex (source-assisted curation)",
+        "reviewer_status": "single_reviewer",
+        "reviewed_at": "2026-09-04T20:35:36Z"
+      },
+      "license": {
+        "identifier": "MIT",
+        "reference": "https://github.com/python-poetry/poetry-core/blob/cc84be60ac9af549664051c2684621db51d05ff1/LICENSE",
+        "source_retrieval_mode": "immutable_reference_fetch",
+        "redistribution": "Reference-and-fetch; redistribution requires retaining the MIT copyright and permission notice."
+      }
+    }
+  ]
+}

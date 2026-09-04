@@ -15,7 +15,7 @@ from evaluation.loader import load_manifest, sha256
 from evaluation.matching import classify, record
 from evaluation.metrics import binary_metrics
 from evaluation.models import (EvaluationReport, MatchingPolicy, Reproducibility,
-                               TargetResult)
+                               PairOutcome, TargetResult)
 
 
 class EvaluationConfig(BaseModel):
@@ -29,6 +29,7 @@ class EvaluationConfig(BaseModel):
     ai_model: str | None = None
     ai_prompt_version: str | None = None
     max_fixture_bytes: int = Field(default=1_000_000, gt=0)
+    source_cache_dir: str = "evaluation/cache"
 
 
 def package_version(name: str):
@@ -67,7 +68,8 @@ def run_evaluation(manifest_path, config: EvaluationConfig | None = None,
     started = perf_counter()
     config = config or EvaluationConfig()
     manifest, contents, manifest_hash, fixture_hashes = load_manifest(
-        manifest_path, max_fixture_bytes=config.max_fixture_bytes)
+        manifest_path, max_fixture_bytes=config.max_fixture_bytes,
+        cache_dir=config.source_cache_dir)
     semgrep_config, semgrep_hash, semgrep_identity = validate_semgrep_config(config.semgrep_config)
     results = []
     raw_total = dedup_total = 0
@@ -112,7 +114,9 @@ def run_evaluation(manifest_path, config: EvaluationConfig | None = None,
                 detected=detected, findings=records,
                 unadjudicated_findings=[item for item in records if not item.target_match],
                 scanner_errors=[error.message for error in scanner.errors],
-                runtime_seconds=runtime, changed_line_status=changed_status))
+                runtime_seconds=runtime, changed_line_status=changed_status,
+                expected_vulnerability_present=case.vulnerability_present,
+                expected_cwe_ids=case.cwe_ids))
         records = [record(case, finding, config.matching_policy) for finding in combined]
         partial = any(not scanner.completed or scanner.errors
                       for scanner in (bandit_result, semgrep_result))
@@ -129,7 +133,9 @@ def run_evaluation(manifest_path, config: EvaluationConfig | None = None,
             scanner_errors=[error.message for scanner in (bandit_result, semgrep_result)
                             for error in scanner.errors],
             runtime_seconds=bandit_runtime + semgrep_runtime,
-            changed_line_status=changed_status))
+            changed_line_status=changed_status,
+            expected_vulnerability_present=case.vulnerability_present,
+            expected_cwe_ids=case.cwe_ids))
         if None in detections.values():
             agreement["unavailable"] += 1
         elif detections["bandit"] and detections["semgrep"]:
@@ -142,6 +148,24 @@ def run_evaluation(manifest_path, config: EvaluationConfig | None = None,
             agreement["neither_detect"] += 1
     modes = ("bandit", "semgrep", "combined")
     grouped = {mode: [item for item in results if item.mode == mode] for mode in modes}
+    pair_outcomes = []
+    pairs = {case.pair_id for case in manifest.cases if case.pair_id}
+    for pair_id in sorted(pairs):
+        vulnerable = next(case for case in manifest.cases
+                          if case.pair_id == pair_id and case.vulnerability_present)
+        fixed = next(case for case in manifest.cases
+                     if case.pair_id == pair_id and not case.vulnerability_present)
+        for mode in modes:
+            vulnerable_result = next(item for item in grouped[mode]
+                                     if item.case_id == vulnerable.case_id)
+            fixed_result = next(item for item in grouped[mode]
+                                if item.case_id == fixed.case_id)
+            outcome = f"{vulnerable_result.status}_{fixed_result.status}"
+            pair_outcomes.append(PairOutcome(pair_id=pair_id, mode=mode,
+                vulnerable_case_id=vulnerable.case_id,
+                vulnerable_status=vulnerable_result.status,
+                fixed_case_id=fixed.case_id, fixed_status=fixed_result.status,
+                outcome=outcome))
     commit, dirty = git_metadata()
     reproducibility = Reproducibility(sentinelreview_commit=commit,
         working_tree_dirty=dirty, dataset_name=manifest.dataset_name,
@@ -156,7 +180,8 @@ def run_evaluation(manifest_path, config: EvaluationConfig | None = None,
         configuration={"bandit_timeout_seconds": config.bandit_timeout_seconds,
             "semgrep_timeout_seconds": config.semgrep_timeout_seconds,
             "matching_policy": config.matching_policy.model_dump(),
-            "max_fixture_bytes": config.max_fixture_bytes})
+            "max_fixture_bytes": config.max_fixture_bytes,
+            "source_cache_dir": config.source_cache_dir})
     return EvaluationReport(report_kind=report_kind,
         synthetic_results_not_performance_claims=report_kind == "synthetic_harness_test",
         reproducibility=reproducibility, results=results,
@@ -169,4 +194,5 @@ def run_evaluation(manifest_path, config: EvaluationConfig | None = None,
         changed_line_metrics_by_mode={mode: binary_metrics(items, changed=True)
                                       for mode, items in grouped.items()},
         ai_metrics=evaluate_ai(results) if config.evaluate_ai else None,
-        total_runtime_seconds=perf_counter()-started)
+        total_runtime_seconds=perf_counter()-started,
+        report_label=manifest.display_name, pair_outcomes=pair_outcomes)

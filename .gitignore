@@ -37,3 +37,4 @@ evaluations/
 
 # Generated evaluation-harness reports
 evaluation/results/
+evaluation/cache/

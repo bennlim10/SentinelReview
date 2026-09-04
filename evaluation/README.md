@@ -82,6 +82,11 @@ UTC timestamp, Python/platform, allowlisted matching/runtime configuration, and
 optional recorded AI provider/model/prompt identifiers. Generated reports contain
 no credentials. A mutable registry identity is weaker than an immutable local hash.
 
+Real-world manifests may use `immutable_reference_fetch`. The loader accepts only
+full GitHub commit SHAs, derives a contained cache path, verifies whole-file and
+assessment-region hashes, and rejects corrupted cache entries or mismatched
+downloads. Cached third-party source lives under gitignored `evaluation/cache/`.
+
 The six bundled cases and local rule are synthetic controls explicitly designed to
 exercise harness branches. Their numeric output is not benchmark performance,
 accuracy, false-positive reduction, or AI improvement evidence.

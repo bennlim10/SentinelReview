@@ -25,15 +25,20 @@ class LineRange(StrictModel):
 
 
 class LabelProvenance(StrictModel):
-    kind: Literal["external_annotation", "constructed_fixture"]
+    kind: Literal["external_annotation", "constructed_fixture",
+                  "reviewed_advisory_manual_localization"]
     reference: str = Field(min_length=1)
     rationale: str = Field(min_length=1)
     reviewed_by: str | None = None
+    reviewer_status: Literal["unreviewed", "single_reviewer", "independently_reviewed"] | None = None
+    reviewed_at: datetime | None = None
 
 
 class LicenseInfo(StrictModel):
     identifier: str | None = None
     reference: str = Field(min_length=1)
+    source_retrieval_mode: Literal["local_fixture", "immutable_reference_fetch"] = "local_fixture"
+    redistribution: str | None = None
 
 
 class BenchmarkCase(StrictModel):
@@ -52,6 +57,18 @@ class BenchmarkCase(StrictModel):
     fixture_path: str | None = None
     code_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
     pair_id: str | None = None
+    pair_role: Literal["vulnerable", "fixed"] | None = None
+    benchmark_group: Literal["synthetic", "scanner_conformance", "real_world"] = "synthetic"
+    repository: str | None = None
+    fixing_commit: str | None = None
+    cve_id: str | None = None
+    ghsa_id: str | None = None
+    advisory_references: list[str] = Field(default_factory=list)
+    duplicate_cluster_id: str | None = None
+    code_fingerprint: str | None = None
+    normalized_fingerprint: str | None = None
+    selection_reason: str | None = None
+    known_scanner_test_overlap: bool | None = None
     changed_line_ranges: list[LineRange] | None = None
     notes: str = ""
     label_provenance: LabelProvenance
@@ -59,7 +76,11 @@ class BenchmarkCase(StrictModel):
 
     @model_validator(mode="after")
     def coherent(self):
-        if (self.code is None) == (self.fixture_path is None):
+        immutable_fetch = self.license.source_retrieval_mode == "immutable_reference_fetch"
+        supplied = sum(value is not None for value in (self.code, self.fixture_path))
+        if immutable_fetch and supplied:
+            raise ValueError("immutable reference cases cannot embed source")
+        if not immutable_fetch and supplied != 1:
             raise ValueError("exactly one of code or fixture_path is required")
         if self.filename.startswith("/") or ".." in self.filename.split("/"):
             raise ValueError("filename must be repository-relative")
@@ -78,12 +99,37 @@ class BenchmarkCase(StrictModel):
             raise ValueError("a target needs CWE IDs or an expected category")
         if any(not value.startswith("CWE-") or not value[4:].isdigit() for value in self.cwe_ids):
             raise ValueError("CWE IDs must use CWE-<number>")
+        if self.benchmark_group == "real_world":
+            required = {"repository": self.repository, "revision": self.source_revision,
+                "pair_id": self.pair_id, "pair_role": self.pair_role,
+                "fixing_commit": self.fixing_commit, "cve_id": self.cve_id,
+                "duplicate_cluster_id": self.duplicate_cluster_id,
+                "code_fingerprint": self.code_fingerprint,
+                "selection_reason": self.selection_reason}
+            missing = [name for name, value in required.items() if not value]
+            if missing:
+                raise ValueError(f"real-world case metadata missing: {', '.join(missing)}")
+            if not immutable_fetch:
+                raise ValueError("real-world cases must use immutable reference fetch")
+            if not self.ghsa_id or not self.advisory_references:
+                raise ValueError("real-world cases require GHSA and advisory references")
+            if (self.label_provenance.kind != "reviewed_advisory_manual_localization"
+                    or not self.label_provenance.reviewed_by
+                    or not self.label_provenance.reviewer_status
+                    or not self.label_provenance.reviewed_at):
+                raise ValueError("real-world cases require complete review provenance")
+            if not self.license.identifier or not self.license.redistribution:
+                raise ValueError("real-world cases require complete license metadata")
+            expected_role = "vulnerable" if self.vulnerability_present else "fixed"
+            if self.pair_role != expected_role:
+                raise ValueError("pair role must agree with vulnerability label")
         return self
 
 
 class DatasetManifest(StrictModel):
     dataset_name: str = Field(min_length=1)
     dataset_version: str = Field(min_length=1)
+    display_name: str | None = None
     cases: list[BenchmarkCase] = Field(min_length=1)
 
     @model_validator(mode="after")
@@ -91,6 +137,24 @@ class DatasetManifest(StrictModel):
         ids = [case.case_id for case in self.cases]
         if len(ids) != len(set(ids)):
             raise ValueError("case IDs must be unique")
+        pairs: dict[str, list[BenchmarkCase]] = {}
+        for case in self.cases:
+            if case.benchmark_group == "real_world":
+                pairs.setdefault(case.pair_id or "", []).append(case)
+        for pair_id, cases in pairs.items():
+            if len(cases) != 2 or {case.pair_role for case in cases} != {"vulnerable", "fixed"}:
+                raise ValueError(f"real-world pair must contain vulnerable and fixed cases: {pair_id}")
+            vulnerable = next(case for case in cases if case.pair_role == "vulnerable")
+            fixed = next(case for case in cases if case.pair_role == "fixed")
+            if (vulnerable.repository, vulnerable.filename, vulnerable.cwe_ids,
+                    vulnerable.fixing_commit, vulnerable.duplicate_cluster_id) != (
+                    fixed.repository, fixed.filename, fixed.cwe_ids,
+                    fixed.fixing_commit, fixed.duplicate_cluster_id):
+                raise ValueError(f"real-world pair metadata mismatch: {pair_id}")
+            if fixed.source_revision != fixed.fixing_commit:
+                raise ValueError(f"fixed case revision must equal fixing commit: {pair_id}")
+            if vulnerable.source_revision == fixed.source_revision:
+                raise ValueError(f"pair revisions must differ: {pair_id}")
         return self
 
 
@@ -130,6 +194,18 @@ class TargetResult(StrictModel):
     scanner_errors: list[str]
     runtime_seconds: float = Field(ge=0)
     changed_line_status: Literal["tp", "fp", "tn", "fn", "unscorable", "scanner_error"] | None = None
+    expected_vulnerability_present: bool | None = None
+    expected_cwe_ids: list[str] = Field(default_factory=list)
+
+
+class PairOutcome(StrictModel):
+    pair_id: str
+    mode: Literal["bandit", "semgrep", "combined"]
+    vulnerable_case_id: str
+    vulnerable_status: str
+    fixed_case_id: str
+    fixed_status: str
+    outcome: str
 
 
 class BinaryMetrics(StrictModel):
@@ -198,3 +274,5 @@ class EvaluationReport(StrictModel):
     changed_line_metrics_by_mode: dict[str, BinaryMetrics | None]
     ai_metrics: AIMetrics | None
     total_runtime_seconds: float = Field(ge=0)
+    report_label: str | None = None
+    pair_outcomes: list[PairOutcome] = Field(default_factory=list)

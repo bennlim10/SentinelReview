@@ -14,7 +14,8 @@ def report():
   reproducibility=repro,results=[],metrics_by_mode={'bandit':BinaryMetrics()},findings_per_case={},
   findings_by_scanner={},findings_by_cwe={},scanner_agreement={},raw_findings_count=0,
   deduplicated_findings_count=0,deduplication_merged_count=0,
-  changed_line_metrics_by_mode={'bandit':None},ai_metrics=None,total_runtime_seconds=0)
+  changed_line_metrics_by_mode={'bandit':None},ai_metrics=None,total_runtime_seconds=0,
+  report_label='REAL-WORLD PILOT — TEST')
 
 def test_json_and_markdown(tmp_path):
  jp,mp=write_reports(report(),tmp_path,'run')
@@ -22,4 +23,5 @@ def test_json_and_markdown(tmp_path):
  assert EvaluationReport.model_validate_json(jp.read_text()).report_kind == 'synthetic_harness_test'
  assert 'not benchmark performance claims' in mp.read_text()
  assert 'undefined' in mp.read_text()
+ assert 'REAL-WORLD PILOT — TEST' in mp.read_text()
  with pytest.raises(ValueError):write_reports(report(),tmp_path,'../escape')

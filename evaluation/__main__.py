@@ -12,11 +12,13 @@ def main():
     parser.add_argument("--output-dir", default="evaluation/results")
     parser.add_argument("--run-id")
     parser.add_argument("--semgrep-config", default="p/security-audit")
+    parser.add_argument("--source-cache-dir", default="evaluation/cache")
     parser.add_argument("--report-kind", choices=["synthetic_harness_test", "scanner_conformance",
                                                    "real_world_benchmark"],
                         default="synthetic_harness_test")
     args = parser.parse_args()
-    config = EvaluationConfig(semgrep_config=args.semgrep_config)
+    config = EvaluationConfig(semgrep_config=args.semgrep_config,
+                              source_cache_dir=args.source_cache_dir)
     report = run_evaluation(args.manifest, config, report_kind=args.report_kind)
     run_id = args.run_id or datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     paths = write_reports(report, args.output_dir, run_id)
