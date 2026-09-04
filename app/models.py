@@ -1,6 +1,7 @@
 from typing import Literal
 
 from pydantic import BaseModel, Field, model_validator
+from app.ai.models import AIReview, AISummary
 
 
 class AnalysisRequest(BaseModel):
@@ -19,6 +20,7 @@ class Evidence(BaseModel):
 
 
 class Finding(BaseModel):
+    ai_review: AIReview = Field(default_factory=AIReview)
     severity: Literal["LOW", "MEDIUM", "HIGH", "UNDEFINED"]
     confidence: Literal["LOW", "MEDIUM", "HIGH", "UNDEFINED"] | None
     category: str
@@ -97,4 +99,6 @@ class AnalysisResponse(BaseModel):
     findings_by_severity: dict[str, int] = Field(default_factory=dict)
     scanner_errors: list[ScannerError] = Field(default_factory=list)
     scanner_metadata: list[ScannerMetadata] = Field(default_factory=list)
+    ai_complete: bool = True
+    ai_summary: AISummary = Field(default_factory=AISummary)
     analysis_complete: bool

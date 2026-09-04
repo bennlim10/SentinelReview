@@ -7,6 +7,7 @@ from app.scanners.runner import run_scanners
 from app.scanners.base import ScanError
 from app.services.dedup import deduplicate
 from collections import Counter
+from app.services.reasoning import review_findings
 from app.services.patches import changed_lines, line_ranges
 
 
@@ -78,7 +79,7 @@ async def analyze(request: AnalysisRequest, github: GitHubClient, settings: Sett
         finding.is_on_changed_line = None if lines is None else finding.line_number in lines
     scanned = [ScannedFile(filename=name, changed_line_ranges=line_ranges(coverage[name]))
                for name in contents if name in successful_files]
-    return AnalysisResponse(
+    response = AnalysisResponse(
         repository=repo, pull_request_number=number, title=pr["title"],
         author=(pr.get("user") or {}).get("login"), base_branch=pr["base"]["ref"],
         head_branch=pr["head"]["ref"], head_sha=pr["head"]["sha"],
@@ -92,3 +93,5 @@ async def analyze(request: AnalysisRequest, github: GitHubClient, settings: Sett
         scanner_errors=[e.model_dump() for e in errors],
         scanner_metadata=[r.model_dump(exclude={"findings", "errors"}) for r in results],
     )
+    await review_findings(response, contents, {f["filename"]: f.get("patch") for f in files}, settings)
+    return response

@@ -1,12 +1,17 @@
 # SentinelReview
 
-SentinelReview v0.2 is an independent personal cybersecurity project. Given a
+SentinelReview v0.3 is an independent personal cybersecurity project. Given a
 public GitHub repository and PR number, it scans the complete changed Python files
 with **Bandit and Semgrep Community Edition**, conservatively merges equivalent
-findings, and returns structured JSON. No proprietary/company code is used.
+findings, and returns structured JSON. An optional, disabled-by-default AI layer
+reviews existing findings in bounded code context. No proprietary/company code is used.
 
-There is no AI, frontend, database, authentication, background worker, webhook,
+There is no frontend, database, authentication, background worker, webhook,
 repository cloning, or deployment infrastructure.
+
+AI reviews do not replace scanners or change deterministic severity. Live OpenAI
+validation is **pending** because API credentials are not configured; AI tests use
+fake providers and mocked HTTP responses. No v0.3 live response has been generated.
 
 ## Setup
 
@@ -248,3 +253,174 @@ request duration. Runtime is a single observation, not a benchmark.
 References: [GitHub PR API](https://docs.github.com/en/rest/pulls/pulls),
 [Bandit JSON](https://bandit.readthedocs.io/en/latest/formatters/json.html),
 [Semgrep audit rule](https://github.com/semgrep/semgrep-rules/blob/develop/python/lang/security/audit/subprocess-shell-true.yaml).
+
+
+## Optional AI review (v0.3)
+
+The existing endpoint and request remain unchanged. `analysis_complete` still
+means deterministic scanner coverage only. Findings, their ordering, scanner
+severity/confidence, evidence, deduplication, and scanner metrics are preserved.
+The only per-finding addition is `ai_review`; the response adds `ai_summary` and
+`ai_complete`.
+
+The AI path runs after deduplication and changed-line classification, reusing the
+already-downloaded head-version contents. It never executes repository code or
+creates patches. Its architecture is:
+
+| Module | Responsibility |
+| --- | --- |
+| `app/ai/base.py` | Async provider interface and typed provider errors |
+| `app/ai/models.py` | Strict review input/output, status and metadata schemas |
+| `app/ai/provider.py` | Provider factory and isolated OpenAI Responses HTTP adapter |
+| `app/ai/prompts.py` | Versioned contextual-review system prompt |
+| `app/ai/context.py` | Context windows, evidence references, redaction and hashing |
+| `app/services/reasoning.py` | Selection, isolated calls, validation, metrics, optional export |
+
+### Configuration
+
+AI remains disabled unless explicitly enabled. No key, model name or endpoint is
+hardcoded into application logic. To configure a future live run, set these in the
+ignored `.env` file; do not paste keys into source, test fixtures or shared output:
+
+| Variable | Default / requirement |
+| --- | --- |
+| `AI_ENABLED` | `false` |
+| `AI_PROVIDER` | unset; use `openai` for the implemented adapter |
+| `AI_MODEL` | unset; choose an accessible model supporting structured outputs |
+| `AI_ENDPOINT` | unset; full HTTPS Responses API URL from provider documentation |
+| `AI_API_KEY` | unset; provider credential |
+| `AI_TIMEOUT_SECONDS` | 30 per attempted review |
+| `AI_MAX_FINDINGS` | 3; maximum 50; zero selects no findings |
+| `AI_MAX_CONTEXT_CHARS` | 12000; counts the entire serialized per-finding input |
+| `AI_CONTEXT_LINES` | 15 lines before and after the primary line |
+| `AI_CHANGED_LINES_ONLY` | `false` |
+| `AI_MAX_OUTPUT_TOKENS` | 1200 |
+| `AI_MAX_RESPONSE_BYTES` | 65536; bounded while streaming |
+| `AI_EVALUATION_OUTPUT` | unset; optional local JSON destination |
+
+The endpoint is operator configuration, not accepted in the REST request. It must
+use HTTPS without embedded credentials, query parameters or fragments. Redirects
+and environment proxy discovery are disabled. Calls are sequential with no retries,
+no tools, and `store=false`. A selected finding gets at most one provider call.
+These are per-request bounds, not an account spending limit or global rate limit.
+Missing provider configuration only affects AI; disabled AI creates no provider
+and makes no AI network requests.
+
+### Context, selection and prompt
+
+Selection prefers findings with changed-line status `true`, then stronger scanner
+severity, then stable filename/line/rule ordering. It never reorders the API's
+deterministic findings. Changed-line-only mode excludes both `false` and `null`.
+Findings beyond the limit remain in the response with a skip reason.
+
+Each input contains the normalized finding, scanner evidence, limited PR metadata,
+numbered nearby code and, when patch coverage is verified, nearby diff lines. It
+omits PR bodies, author details and unrelated files. Evidence IDs such as
+`scanner:0`, `code:29` and `diff:4` are scoped to that input. Deleted diff lines have
+no head-line number. Unverified patches are omitted rather than treated as facts.
+
+The character bound covers the canonical serialized input including metadata,
+evidence and truncation notes, not just code. The fixed system prompt and output
+schema are additional bounded request content. If necessary the builder removes
+diff context, then the furthest code lines, then shortens verbose messages/title.
+It retains scanner evidence and the primary code line. If essential context still
+cannot fit, the selected finding is skipped instead of sending an oversized call.
+Truncation and unavailable-context notes are exposed on its review wrapper.
+
+Common credential patterns receive best-effort redaction. This is not a complete
+secret detector. Raw contexts are not included in normal API responses or local
+evaluation exports. A `finding_id` identifies the finding at its head SHA; a
+`context_id` is SHA-256 of canonical bounded input excluding `context_id` itself.
+The hash includes prompt version and identifies the input, not model behavior.
+
+Prompt version `sentinelreview-security-review-v1` states that scanners generated
+the finding; AI only reviews its contextual validity and priority. It requires
+uncertainty over unsupported certainty, prohibits inventing vulnerabilities or
+application context, and explains that a changed line does not prove introduction.
+Repository text, PR titles, scanner messages and code comments are untrusted data,
+never instructions. Tests check instruction separation; they cannot establish
+complete prompt-injection resistance against a live model.
+
+### Structured results and evidence
+
+A completed review has strict, extra-fields-forbidden output:
+
+- `verdict`: `likely_valid`, `likely_false_positive`, or `needs_review`.
+- `exploitability` and `impact`: `low`, `medium`, `high`, or `unknown`.
+- `priority`: `low`, `medium`, `high`, or `critical`.
+- `confidence`: finite numeric value from 0 to 1.
+- `reasoning` and `remediation`: nonempty strings of at most 1500 characters each.
+- `evidence_used`: 1–20 unique references, all present in that finding's input.
+
+Provider responses are validated locally even when a provider requests strict
+structured output. Extra keys, invalid enums, malformed JSON, invalid references,
+refusals, incomplete outputs and unexpected tool output do not become reviews.
+Credential-like output is rejected. No arbitrary provider payload is returned.
+Checking references establishes that evidence was supplied, not that the model's
+interpretation is correct. Model confidence is self-reported and uncalibrated.
+AI priority is independent of scanner severity; there is no combined score.
+
+### Completion and failure semantics
+
+Each `ai_review` exposes `status` (`disabled`, `skipped`, `completed`, `failed`),
+`selected`, skip reason, context identifiers/size/notes, validated `result` or null,
+a sanitized error or null, and optional safe provider metadata.
+
+| Situation | `ai_complete` |
+| --- | --- |
+| AI disabled | true: no AI work was expected; all findings marked disabled |
+| AI enabled, no findings selected (including zero limit) | true: no AI work was expected |
+| Every selected finding completed | true |
+| Any selected finding failed or was skipped | false |
+
+Unselected findings excluded by limits/filters do not make AI incomplete. A
+selected finding skipped because of context limits or provider configuration does.
+`ai_complete=true` therefore does **not** mean every deterministic finding was
+reviewed. `ai_summary` and individual statuses are authoritative.
+
+`ai_summary` records enabled state, selected count, requested (actual attempted
+calls), completed, failed, skipped and disabled counts, verdict/priority counts,
+AI-phase elapsed seconds, prompt version, configured provider/model, systemic
+errors and optional export error. Skipped counts include selected and unselected
+skips; use per-finding `selected` to distinguish them. Completed plus failed equals
+attempted calls. AI runtime is zero when disabled and otherwise measures selection,
+context building and review processing, excluding optional export time.
+
+Timeouts and individual malformed/failed responses preserve deterministic findings
+and allow later reviews. Authentication/rate-limit failures stop further calls:
+the attempted finding fails and remaining selected findings are skipped. Missing
+configuration skips selected findings with a systemic error and attempts no calls.
+AI failures never change `analysis_complete` or erase scanner results.
+
+Successful reviews may retain reported model, response ID and request ID from an
+explicit allowlist. These identifiers are optional and filtered; credentials,
+headers as a whole, endpoints, provider response bodies and unnecessary internals
+are not exposed. Configured model/provider are recorded separately in the summary.
+Versions and context hashes support traceability but cannot make AI deterministic.
+
+### Optional evaluation export
+
+Set `AI_EVALUATION_OUTPUT` to a local file inside an existing directory, preferably
+under ignored `evaluations/`. While AI is enabled, the service atomically writes a
+sanitized JSON snapshot there after reasoning. A fixed destination is replaced by
+later requests; use separate operator-selected paths when retaining multiple runs.
+The file contains deterministic findings, review results/status, context IDs and
+safe reproducibility metadata. No raw code contexts or HTTP payloads are persisted.
+`expected_label` is null because this version has no supplied labeled dataset;
+labels can be joined later using identifiers and must never be inferred from AI.
+Export errors are reported separately and do not change review or scanner success.
+
+### Validation status
+
+Automated tests use fake providers and mocked HTTP. They cover success, multiple
+reviews, schema/JSON validation, evidence references, timeouts, provider failures,
+partial failures, limits/truncation, changed-line selection, completion semantics,
+unchanged deterministic results, metadata, safe-output handling and local export.
+The existing v0.2 test suite remains part of the full run.
+
+**Live OpenAI validation is pending due to unavailable API credentials.** No live
+OpenAI call has been made for v0.3, and `examples/live_analysis_v0_3.json` has not
+been created. Real provider authentication, model access, acceptance of the
+structured-output schema, model judgments, latency and token usage remain
+unvalidated. No accuracy, false-positive reduction, or prioritization improvement
+is claimed. Those require a labeled evaluation phase.

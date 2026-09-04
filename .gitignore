@@ -31,3 +31,6 @@ env/
 .coverage.*
 coverage.xml
 *.log
+
+# Optional local AI evaluation output
+evaluations/
