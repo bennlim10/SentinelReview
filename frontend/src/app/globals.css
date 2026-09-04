@@ -1,0 +1,24 @@
+@import "tailwindcss";
+:root { --background: #090d14; --foreground: #e2e8f0; }
+@theme inline { --color-background: var(--background); --color-foreground: var(--foreground); --font-sans: ui-sans-serif, system-ui, sans-serif; --font-mono: ui-monospace, SFMono-Regular, monospace; }
+* { box-sizing: border-box; }
+html { background: var(--background); scroll-behavior: smooth; }
+body { margin: 0; background: var(--background); color: var(--foreground); font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+button, input { font: inherit; }
+button { cursor: pointer; }
+button:focus-visible, summary:focus-visible { outline: 2px solid #34d399; outline-offset: 3px; }
+.field { display: block; }
+.field > span, .label { display: block; color: #64748b; font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.field > div { margin-top: 6px; display: flex; height: 48px; align-items: center; gap: 10px; border: 1px solid rgba(255,255,255,.08); border-radius: 12px; background: #090e16; padding: 0 14px; color: #64748b; transition: border-color .2s, box-shadow .2s; }
+.field > div:focus-within { border-color: rgba(52,211,153,.5); box-shadow: 0 0 0 3px rgba(52,211,153,.08); }
+.field input { min-width: 0; width: 100%; border: 0; outline: 0; background: transparent; color: #f8fafc; font-size: 14px; }
+.field input::placeholder { color: #475569; }
+.eyebrow { color: #64748b; font-size: 10px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; }
+.detail-value { margin-top: 6px; color: #cbd5e1; font-size: 13px; font-weight: 500; text-transform: capitalize; }
+.tag { max-width: 100%; overflow-wrap: anywhere; border: 1px solid rgba(255,255,255,.06); border-radius: 4px; background: rgba(255,255,255,.035); padding: 3px 6px; color: #94a3b8; font-size: 10px; }
+.detail-list { margin-top: 10px; font-size: 12px; }
+.detail-list > div { display: flex; justify-content: space-between; gap: 16px; border-bottom: 1px solid rgba(255,255,255,.05); padding: 8px 0; }
+.detail-list dt { color: #64748b; }.detail-list dd { color: #cbd5e1; text-align: right; }
+.spinner { height: 14px; width: 14px; border: 2px solid rgba(6,78,59,.35); border-top-color: #064e3b; border-radius: 999px; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+::selection { background: rgba(52,211,153,.25); color: white; }

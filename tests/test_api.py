@@ -33,3 +33,21 @@ def test_validation(client, repo, number):
 def test_github_error(client, github):
     github.pull_request.side_effect = GitHubError("Not found", 404)
     assert client.post("/api/v1/analyze", json={"repository": "a/b", "pull_request_number": 1}).status_code == 404
+
+
+def test_local_frontend_cors(client):
+    response = client.options("/api/v1/analyze", headers={
+        "Origin": "http://localhost:3000",
+        "Access-Control-Request-Method": "POST",
+        "Access-Control-Request-Headers": "content-type",
+    })
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == "http://localhost:3000"
+
+
+def test_untrusted_origin_is_not_allowed(client):
+    response = client.options("/api/v1/analyze", headers={
+        "Origin": "https://example.com",
+        "Access-Control-Request-Method": "POST",
+    })
+    assert "access-control-allow-origin" not in response.headers

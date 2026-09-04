@@ -31,9 +31,11 @@ requires a separate licensing and provenance decision.
 3. **Scanner-conformance evaluation** uses deliberately constructed or scanner-
    authored positive/negative examples to check known rule behavior. It is biased
    toward those rules and is not representative scanner accuracy.
-4. **Real-world vulnerability benchmarking** requires separately approved,
+4. **Real-world vulnerability benchmarking** uses separately identified,
    authoritative, localized labels, negative assessment scopes, source revisions,
-   content hashes, and license review. No such cases are included yet.
+   content hashes, and license review. The existing six-case pilot is documented in
+   [`benchmarks/real-world-pilot-v1/`](benchmarks/real-world-pilot-v1/); its small,
+   single-reviewer results validate methodology rather than overall accuracy.
 5. **Optional AI-assisted evaluation** consumes already recorded, validated AI
    reviews. It never invokes a provider. `needs_review` is abstention; missing,
    failed, skipped, and disabled reviews are unavailable. AI cannot recover scanner
@@ -90,3 +92,9 @@ downloads. Cached third-party source lives under gitignored `evaluation/cache/`.
 The six bundled cases and local rule are synthetic controls explicitly designed to
 exercise harness branches. Their numeric output is not benchmark performance,
 accuracy, false-positive reduction, or AI improvement evidence.
+
+The real-world pilot is analytically separate from synthetic and scanner-conformance
+runs. Its tracked directory contains only the manifest and provenance documentation;
+immutable third-party source is fetched into `evaluation/cache/`, and generated JSON
+and Markdown reports remain under `evaluation/results/`. Both directories are
+gitignored.

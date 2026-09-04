@@ -1,4 +1,5 @@
 from pathlib import Path
+import subprocess
 import pytest
 from app.models import Finding,ScannerError
 from app.scanners.base import ScannerResult
@@ -30,6 +31,8 @@ def fake_scan(scanner, failures=None):
  return scan
 
 def test_runner_metrics_reproducibility_and_agreement(monkeypatch):
+ expected_dirty=bool(subprocess.run(['git','status','--porcelain'],capture_output=True,
+  text=True,check=True).stdout.strip())
  monkeypatch.setattr('evaluation.runner.bandit.scan',fake_scan('bandit'))
  monkeypatch.setattr('evaluation.runner.semgrep.scan',fake_scan('semgrep'))
  report=run_evaluation(MANIFEST,EvaluationConfig(semgrep_config=str(RULES)))
@@ -44,7 +47,7 @@ def test_runner_metrics_reproducibility_and_agreement(monkeypatch):
  assert report.scanner_agreement=={'both_detect':1,'bandit_only':2,'neither_detect':2,'unavailable':1}
  assert report.changed_line_metrics_by_mode['bandit'].true_positives==1
  r=report.reproducibility
- assert r.sentinelreview_commit and r.working_tree_dirty and r.dataset_version=='1.0.0'
+ assert r.sentinelreview_commit and r.working_tree_dirty is expected_dirty and r.dataset_version=='1.0.0'
  assert r.bandit_version=='bandit-version' and r.semgrep_version=='semgrep-version'
  assert r.semgrep_config_sha256 and len(r.manifest_sha256)==64 and len(r.fixture_sha256)==6
  assert not r.ai_enabled and report.ai_metrics is None

@@ -1,17 +1,52 @@
 # SentinelReview
 
-SentinelReview v0.3 is an independent personal cybersecurity project. Given a
-public GitHub repository and PR number, it scans the complete changed Python files
-with **Bandit and Semgrep Community Edition**, conservatively merges equivalent
-findings, and returns structured JSON. An optional, disabled-by-default AI layer
-reviews existing findings in bounded code context. No proprietary/company code is used.
+**AI-assisted security analysis for GitHub pull requests.**
 
-There is no frontend, database, authentication, background worker, webhook,
-repository cloning, or deployment infrastructure.
+SentinelReview combines deterministic static analysis, cross-scanner normalization,
+contextual AI reasoning, and reproducible security evaluation to help identify and
+prioritize security issues in code changes. The current development version is
+**v0.5** and is an independent personal cybersecurity project.
+
+Key capabilities:
+
+- Public GitHub pull-request ingestion pinned to the PR head commit
+- Bandit and Semgrep Community Edition static analysis
+- A common normalized security-finding schema with scanner-specific evidence
+- Conservative cross-scanner deduplication
+- Changed-line classification with explicit incomplete-coverage handling
+- Optional, disabled-by-default contextual AI security reasoning
+- A reproducible evaluation harness with strict case-target matching
+- A transparent real-world CVE benchmark methodology
+- 189 automated tests covering deterministic, AI, API, and evaluation behavior
+
+Given a public repository and PR number, SentinelReview scans complete changed
+Python files, conservatively merges equivalent findings, and returns structured
+JSON. The local Next.js interface presents the same real backend response. No
+proprietary or company code is used.
+
+The repository includes a local Next.js analysis interface. There is no database,
+authentication, background worker, webhook, repository cloning, or deployment
+infrastructure.
 
 AI reviews do not replace scanners or change deterministic severity. Live OpenAI
 validation is **pending** because API credentials are not configured; AI tests use
-fake providers and mocked HTTP responses. No v0.3 live response has been generated.
+fake providers and mocked HTTP responses. No live AI response has been generated.
+
+## Current validation status
+
+- The full suite contains **189 automated tests** after adding the local frontend
+  CORS checks.
+- Evaluation includes synthetic harness validation and a real-world pilot benchmark.
+- The pilot contains **3 vulnerable/fixed pairs (6 cases)** with immutable source
+  references, explicit assessment scopes, hashes, provenance, and license metadata.
+- Bandit, Semgrep, and the combined deterministic pipeline each detected **0 of 3**
+  vulnerable pilot targets within the labeled scopes; all three fixed controls were
+  true negatives.
+- This pilot validates methodology and pipeline behavior. It is not an overall
+  accuracy, production-effectiveness, false-positive-reduction, or AI-improvement
+  benchmark.
+- Contextual AI reasoning is implemented and covered with fake-provider tests, but
+  live provider validation has not been performed.
 
 ## Setup
 
@@ -37,6 +72,18 @@ analysis requires access to GitHub and the Semgrep registry. No Semgrep account 
 token is required. A registry failure is a scanner error, not a clean result.
 
 Open [interactive API documentation](http://127.0.0.1:8000/docs).
+
+For the local web interface, start a second terminal after the backend is running:
+
+```bash
+cd frontend
+cp .env.example .env.local
+pnpm install
+pnpm dev
+```
+
+Then open [the SentinelReview interface](http://localhost:3000). The frontend calls
+the configured real backend and does not include mock findings.
 
 ```bash
 curl -X POST http://127.0.0.1:8000/api/v1/analyze \
@@ -419,13 +466,13 @@ unchanged deterministic results, metadata, safe-output handling and local export
 The existing v0.2 test suite remains part of the full run.
 
 **Live OpenAI validation is pending due to unavailable API credentials.** No live
-OpenAI call has been made for v0.3, and `examples/live_analysis_v0_3.json` has not
+OpenAI call has been made, and `examples/live_analysis_v0_3.json` has not
 been created. Real provider authentication, model access, acceptance of the
 structured-output schema, model judgments, latency and token usage remain
 unvalidated. No accuracy, false-positive reduction, or prioritization improvement
 is claimed. Those require a labeled evaluation phase.
 
-## Evaluation harness (v0.4)
+## Evaluation harness and real-world pilot (v0.5)
 
 The standalone `evaluation` package evaluates Bandit, Semgrep, and their combined
 output against strictly scoped manifests without starting FastAPI or invoking AI.
@@ -434,10 +481,21 @@ case-target confusion metrics with null zero-denominator values, changed-line
 comparisons, scanner agreement/errors, deduplication counts, reproducibility hashes,
 and JSON/Markdown reports.
 
-Only six intentionally constructed synthetic harness fixtures are included. They
-must not be presented as real benchmark performance. No public benchmark cases or
-Semgrep registry snapshot have been imported. See
+Six intentionally constructed synthetic harness fixtures validate harness behavior
+and must not be presented as real benchmark performance. The separately identified
+[real-world pilot](evaluation/benchmarks/real-world-pilot-v1/) contains the tracked
+manifest and provenance metadata for three vulnerable/fixed CVE pairs. Fetched
+third-party source under `evaluation/cache/` and generated reports under
+`evaluation/results/` remain untracked. No Semgrep registry snapshot is committed.
+See
 [`evaluation/README.md`](evaluation/README.md) for the required distinction among
 unit tests, synthetic harness validation, scanner-conformance checks, real-world
 benchmarking, and optional recorded-AI evaluation. Generated collections under
 `evaluation/results/` are ignored by Git.
+
+## License
+
+SentinelReview source code authored for this repository is available under the
+[MIT License](LICENSE). Third-party tools, external rules, advisories, and fetched
+benchmark source remain subject to their respective licenses and are not relicensed
+by SentinelReview.
